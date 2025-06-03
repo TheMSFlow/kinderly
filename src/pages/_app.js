@@ -1,3 +1,4 @@
+import { ThemeProvider } from "@/hooks/ThemeContext";
 import "@/styles/globals.css";
 
 import { Geist } from "next/font/google";
@@ -12,8 +13,10 @@ const playfair = Playfair_Display({
 
 export default function App({ Component, pageProps }) {
   return (
-    <main className={`${geist.className} ${playfair.variable}`}>
-      <Component {...pageProps} />
-    </main>
+    <ThemeProvider>
+      <main className={`${geist.className} ${playfair.variable}`}>
+        <Component {...pageProps} />
+      </main>
+    </ThemeProvider>
   );
 }

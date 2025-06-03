@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+:root {
+  --bg-primary: theme('colors.slate.200');
+  --bg-primary-sidebar: theme('colors.slate.300');
+  --bg-secondary: theme('colors.slate.900');
+  --bg-secondary-sidebar: theme('colors.slate.800');
+  --modal-bg: theme('colors.slate.300');
+
+  --heading: theme('colors.slate.900');
+  --text-primary: theme('colors.slate.900');
+  --text-secondary: theme('colors.slate.700');
+  --text-tertiary: theme('colors.slate.800');
+
+  --b-border: theme('colors.slate.300');
+  --nav-bg: theme('colors.slate.900 / 15%');
+  --input-bg: theme('colors.slate.50');
+  --input-border: theme('colors.slate.200');
+  --input-text: theme('colors.slate.700');
+  --placeholder-text: theme('colors.slate.400');
+
+  --nav-default: theme('colors.slate.900');
+  --nav-hover: theme('colors.slate.500');
+  --nav-active: theme('colors.slate.700');
+
+  --icon-default: theme('colors.slate.900');
+
+  --toggle-bg: theme('colors.slate.300');
+  --toggle-btn: theme('colors.slate.400');
+
+  --btn-primary: theme('colors.slate.700');
+  --btn-primary-hover: theme('colors.slate.800');
+  --btn-primary-text: theme('colors.slate.50');
+  --btn-secondary-border: theme('colors.slate.700');
+  --btn-secondary-hover: theme('colors.slate.50');
+  --btn-secondary-text: theme('colors.slate.700');
+  --btn-tertiary-border: theme('colors.slate.50');
+  --btn-tertiary-hover: theme('colors.slate.900');
+  --btn-tertiary-text: theme('colors.slate.50');  
+  --btn-warning-border: theme('colors.red.800');
+  --btn-warning-hover: theme('colors.red.100');
+  --btn-warning-text: theme('colors.red.800');
+  --btn-ghost: theme('colors.slate.700');
+  --btn-ghost-hover: theme('colors.slate.900');
+  --btn-wide: theme('colors.slate.700');
+  --btn-wide-hover: theme('colors.slate.800');
+
+
+
+
+}
+
+.dark {
+  --bg-primary: theme('colors.slate.900');
+  --bg-primary-sidebar: theme('colors.slate.900');
+  --bg-secondary: theme('colors.slate.500');
+  --bg-secondary-sidebar: theme('colors.slate.500');
+  --modal-bg: theme('colors.slate.800');
+
+  --heading: theme('colors.slate.100');
+  --text-primary: theme('colors.slate.100');
+  --text-secondary: theme('colors.slate.200');
+  --text-tertiary: theme('colors.slate.400');
+
+  --b-border: theme('colors.slate.600');
+  --nav-bg: theme('colors.slate.800 / 90%');
+  --input-bg: theme('colors.slate.700');
+  --input-border: theme('colors.slate.600');
+  --input-text: theme('colors.slate.100');
+  --placeholder-text: theme('colors.slate.400');
+
+  --nav-default: theme('colors.slate.100');
+  --nav-hover: theme('colors.slate.300');
+  --nav-active: theme('colors.slate.500');
+
+  --icon-default: theme('colors.slate.100');
+
+  --toggle-bg: theme('colors.slate.700');
+  --toggle-btn: theme('colors.slate.500');
+
+  --btn-primary: theme('colors.slate.400');
+  --btn-primary-hover: theme('colors.slate.300');
+  --btn-primary-text: theme('colors.slate.900');
+  --btn-secondary-border: theme('colors.slate.200');
+  --btn-secondary-hover: theme('colors.slate.700');
+  --btn-secondary-text: theme('colors.slate.200');  
+  --btn-tertiary-border: theme('colors.slate.900');
+  --btn-tertiary-hover: theme('colors.slate.50');
+  --btn-tertiary-text: theme('colors.slate.900');
+  --btn-warning-border: theme('colors.red.100');
+  --btn-warning-hover: theme('colors.red.800');
+  --btn-warning-text: theme('colors.red.100');  
+  --btn-ghost: theme('colors.slate.200');
+  --btn-ghost-hover: theme('colors.slate.400');  
+  --btn-wide: theme('colors.slate.700');
+  --btn-wide-hover: theme('colors.slate.800');
+
+}    
+}
