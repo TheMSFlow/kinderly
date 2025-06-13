@@ -1,50 +1,43 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+"use client"
+
+import React, { createContext, useState, useEffect, useContext } from "react";
 
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState('light'); // default to light
+  const [theme, setTheme] = useState("light");
 
-  // On mount: load saved theme or system preference
+  // On mount, set initial theme from localStorage or system preference
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark' || savedTheme === 'light') {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark" || savedTheme === "light") {
       setTheme(savedTheme);
-      updateHtmlClass(savedTheme);
     } else {
-      // fallback to system preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setTheme(prefersDark ? 'dark' : 'light');
-      updateHtmlClass(prefersDark ? 'dark' : 'light');
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setTheme(prefersDark ? "dark" : "light");
     }
   }, []);
 
-  // Update <html> class based on theme
-  const updateHtmlClass = (theme) => {
+  // Update <html> class whenever theme changes
+  useEffect(() => {
     const html = document.documentElement;
-    if (theme === 'dark') {
-      html.classList.add('dark');
+    if (theme === "dark") {
+      html.classList.add("dark");
     } else {
-      html.classList.remove('dark');
+      html.classList.remove("dark");
     }
-  };
+    // Save theme preference
+    localStorage.setItem("theme", theme);
+  }, [theme]);
 
-  // Toggle theme function
+  // Toggle theme
   const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    updateHtmlClass(newTheme);
-    localStorage.setItem('theme', newTheme);
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>;
 }
 
-// Custom hook for easier use
 export function useTheme() {
   return useContext(ThemeContext);
 }

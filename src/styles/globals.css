@@ -6,18 +6,21 @@
 @layer base {
 :root {
   --bg-primary: theme('colors.slate.200');
+  --bg-primary-mainbar: theme('colors.slate.200');
   --bg-primary-sidebar: theme('colors.slate.300');
   --bg-secondary: theme('colors.slate.900');
   --bg-secondary-sidebar: theme('colors.slate.800');
-  --modal-bg: theme('colors.slate.300');
+  --bg-auth: theme('colors.slate.300');
+  --bg-modal: theme('colors.slate.600');
+  --bg-dropdown: theme('colors.slate.100');
+  --bg-nav: theme('colors.slate.900 / 15%');
 
   --heading: theme('colors.slate.900');
   --text-primary: theme('colors.slate.900');
   --text-secondary: theme('colors.slate.700');
   --text-tertiary: theme('colors.slate.800');
 
-  --b-border: theme('colors.slate.300');
-  --nav-bg: theme('colors.slate.900 / 15%');
+  --b-border: theme('colors.slate.400');
   --input-bg: theme('colors.slate.50');
   --input-border: theme('colors.slate.200');
   --input-text: theme('colors.slate.700');
@@ -28,6 +31,7 @@
   --nav-active: theme('colors.slate.700');
 
   --icon-default: theme('colors.slate.900');
+  --icon-hover: theme('colors.slate.500');
 
   --toggle-bg: theme('colors.slate.300');
   --toggle-btn: theme('colors.slate.400');
@@ -39,8 +43,8 @@
   --btn-secondary-hover: theme('colors.slate.50');
   --btn-secondary-text: theme('colors.slate.700');
   --btn-tertiary-border: theme('colors.slate.50');
-  --btn-tertiary-hover: theme('colors.slate.900');
-  --btn-tertiary-text: theme('colors.slate.50');  
+  --btn-tertiary-hover: theme('colors.slate.700');
+  --btn-tertiary-text: theme('colors.slate.50');
   --btn-warning-border: theme('colors.red.800');
   --btn-warning-hover: theme('colors.red.100');
   --btn-warning-text: theme('colors.red.800');
@@ -56,10 +60,14 @@
 
 .dark {
   --bg-primary: theme('colors.slate.900');
+  --bg-primary-mainbar: theme('colors.slate.800');
   --bg-primary-sidebar: theme('colors.slate.900');
   --bg-secondary: theme('colors.slate.500');
   --bg-secondary-sidebar: theme('colors.slate.500');
-  --modal-bg: theme('colors.slate.800');
+  --bg-auth: theme('colors.slate.800');
+  --bg-modal: theme('colors.slate.800');
+  --bg-dropdown: theme('colors.slate.400');
+  --bg-nav: theme('colors.slate.800 / 90%');
 
   --heading: theme('colors.slate.100');
   --text-primary: theme('colors.slate.100');
@@ -67,7 +75,6 @@
   --text-tertiary: theme('colors.slate.400');
 
   --b-border: theme('colors.slate.600');
-  --nav-bg: theme('colors.slate.800 / 90%');
   --input-bg: theme('colors.slate.700');
   --input-border: theme('colors.slate.600');
   --input-text: theme('colors.slate.100');
@@ -78,6 +85,7 @@
   --nav-active: theme('colors.slate.500');
 
   --icon-default: theme('colors.slate.100');
+  --icon-hover: theme('colors.slate.500');
 
   --toggle-bg: theme('colors.slate.700');
   --toggle-btn: theme('colors.slate.500');
@@ -88,9 +96,9 @@
   --btn-secondary-border: theme('colors.slate.200');
   --btn-secondary-hover: theme('colors.slate.700');
   --btn-secondary-text: theme('colors.slate.200');  
-  --btn-tertiary-border: theme('colors.slate.900');
-  --btn-tertiary-hover: theme('colors.slate.50');
-  --btn-tertiary-text: theme('colors.slate.900');
+  --btn-tertiary-border: theme('colors.slate.50');
+  --btn-tertiary-hover: theme('colors.slate.900');
+  --btn-tertiary-text: theme('colors.slate.50');  
   --btn-warning-border: theme('colors.red.100');
   --btn-warning-hover: theme('colors.red.800');
   --btn-warning-text: theme('colors.red.100');  

@@ -12,6 +12,14 @@ module.exports = {
   ],
   theme: {
     extend: {
+      screens: {
+        xs: '400px',
+        sm: '480px',
+        md: '768px',
+        lg: '1024px',
+        xl: '1280px',
+        '2xl': '1536px',
+      },
       colors: {
         slate: colors.slate,
         amber: colors.amber,
@@ -27,10 +35,14 @@ module.exports = {
 
         // Custom design token mapping
         'bg-primary': 'var(--bg-primary)',
+        'bg-primary-mainbar': 'var(--bg-primary-mainbar)',
         'bg-primary-sidebar': 'var(--bg-primary-sidebar)',
         'bg-secondary': 'var(--bg-secondary)',
         'bg-secondary-sidebar': 'var(--bg-secondary-sidebar)',
-        'modal-bg': 'var(--modal-bg)',
+        'bg-auth': 'var(--bg-auth)',
+        'bg-modal': 'var(--bg-modal)',
+        'bg-dropdown': 'var(--bg-dropdown)',
+        'bg-nav': 'var(--bg-nav)',
 
         heading: 'var(--heading)',
         'text-primary': 'var(--text-primary)',
@@ -38,7 +50,6 @@ module.exports = {
         'text-tertiary': 'var(--text-tertiary)',
 
         'b-border': 'var(--b-border)',
-        'nav-bg': 'var(--nav-bg)',
         'input-bg': 'var(--input-bg)',
         'input-border': 'var(--input-border)',
         'input-text': 'var(--input-text)',
@@ -49,6 +60,7 @@ module.exports = {
         'nav-active': 'var(--nav-active)',
 
         'icon-default': 'var(--icon-default)',
+        'icon-hover': 'var(--icon-hover)',
 
         'toggle-bg': 'var(--toggle-bg)',
         'toggle-btn': 'var(--toggle-btn)',
