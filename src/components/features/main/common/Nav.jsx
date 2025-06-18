@@ -4,12 +4,12 @@ import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-import Home from '../../icons/footer/Home'
-import HomeActive from '../../icons/footer/HomeActive'
-import Event from '../../icons/footer/Event'
-import EventActive from '../../icons/footer/EventActive'
-import Profile from '../../icons/footer/Profile'
-import ProfileActive from '../../icons/footer/ProfileActive'
+import Home from '../../../icons/footer/Home'
+import HomeActive from '../../../icons/footer/HomeActive'
+import Event from '../../../icons/footer/Event'
+import EventActive from '../../../icons/footer/EventActive'
+import Profile from '../../../icons/footer/Profile'
+import ProfileActive from '../../../icons/footer/ProfileActive'
 import Add from '@/components/icons/footer/Add'
 
 const Nav = () => {

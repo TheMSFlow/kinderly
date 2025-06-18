@@ -1,22 +1,12 @@
 'use client'
 
 import React, { useState } from 'react'
-import Nav from '@/components/features/main/Nav'
-import Header from '@/components/features/main/Header'
+import Nav from '@/components/features/main/common/Nav'
+import Header from '@/components/features/main/common/Header'
 import Filter from '@/components/icons/header/Filter'
 
-import ViewSorter from '@/components/features/main/ViewSorter'
-import BirthDay from '@/components/icons/events/BirthDay'
-import ValentinesDay from '@/components/icons/events/ValentinesDay'
-import ChildrensDay from '@/components/icons/events/ChildrensDay'
-import GirlChildDay from '@/components/icons/events/GirlChildDay'
-import BoyChildDay from '@/components/icons/events/BoyChildDay'
-import GrandFathersDay from '@/components/icons/events/GrandFathersDay'
-import GrandMothersDay from '@/components/icons/events/GrandMothersDay'
-import GrandAnniversary from '@/components/icons/events/GrandAnniversary'
-import FathersDay from '@/components/icons/events/FathersDay'
-import MothersDay from '@/components/icons/events/MothersDay'
-import Anniversary from '@/components/icons/events/Anniversary'
+import ViewSorter from '@/components/features/main/event/ViewSorter'
+import EventCard from '@/components/features/main/event/EventCard'
 
 const EventsSidebar = () => {
     const [rightModal, setRightModal] = useState(false);
@@ -26,27 +16,20 @@ const EventsSidebar = () => {
   }
   return (
     <>
-      <div className='relative h-full w-full grid grid-rows-[6rem_1fr] lg:grid-rows-[5rem_1fr]'>
+      <div className='relative h-full w-full'>
         <Header
         rightIcon={Filter} 
         title={'Upcoming Events'}
         onRightClick={handleRightIconClick}
         />
-        {rightModal && <div className='absolute z-10 top-20 right-4'> <ViewSorter /> </div>}
-        <div className='h-full'>
-          <div className='flex flex-wrap gap-4 w-80% justify-center items-center py-4'>
-            <BirthDay />
-            <ValentinesDay />
-            <ChildrensDay />
-            <GirlChildDay />
-            <BoyChildDay />
-            <GrandFathersDay />
-            <GrandMothersDay />
-            <GrandAnniversary />
-            <FathersDay />
-            <MothersDay />
-            <Anniversary />
-          </div>
+        {rightModal && <div className='absolute z-50 top-20 right-4'> <ViewSorter /> </div>}
+        <div className='h-full w-full flex justify-center items-start overflow-hidden overflow-y-auto hide-scrollbar pt-12 lg:pt-[6rem] pb-[8rem]'>
+          <EventCard 
+            name={'Michael'}
+            title={'Dad'}
+            timeLeft={29}
+            content={"What are you planning? Remember it’s about how much you do, but how much thoughtfulness you put into what you do. See dad’s wish list for more ideas."}
+          />
         </div>
         <div className='flex items-center justify-center w-full'>
           <Nav />

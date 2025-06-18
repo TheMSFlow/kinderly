@@ -42,6 +42,7 @@ module.exports = {
         'bg-auth': 'var(--bg-auth)',
         'bg-modal': 'var(--bg-modal)',
         'bg-dropdown': 'var(--bg-dropdown)',
+        'bg-header': 'var(--bg-header)',
         'bg-nav': 'var(--bg-nav)',
 
         heading: 'var(--heading)',

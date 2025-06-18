@@ -5,7 +5,7 @@ import Gift from '@/components/icons/Gift'
 const ProfileEmptyState = () => {
   return (
     <div className='flex flex-col justify-center items-center px-4 pt-28'>
-        <div className='grid place-items-center bg-slate-200 h-[4.5rem] w-[4.5rem] rounded-full'>
+        <div className='grid place-items-center bg-slate-300 h-[4.5rem] w-[4.5rem] rounded-full'>
             <Gift />
         </div>
         <p className='text-center text-sm mt-6'>Looks like you haven’t added any items yet.</p>

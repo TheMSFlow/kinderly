@@ -5,8 +5,8 @@ import Button from '@/components/common/Button'
 
 const HomeEmptyState = () => {
   return (
-    <div className='flex flex-col justify-center items-center px-4 pt-20'>
-        <div className='grid place-items-center bg-slate-200 h-[4.5rem] w-[4.5rem] rounded-full'>
+    <div className='flex flex-col justify-center items-center px-4 pt-20 lg:pt-0'>
+        <div className='grid place-items-center bg-slate-300 h-[4.5rem] w-[4.5rem] rounded-full'>
             <Gift />
         </div>
         <h1 className='font-playfair text-2xl mt-6'> No items yet</h1>

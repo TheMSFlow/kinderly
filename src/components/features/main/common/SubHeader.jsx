@@ -1,5 +1,5 @@
 import React from 'react'
-import Back from '../../icons/header/Back'
+import Back from '../../../icons/header/Back'
 
 
 const SubHeader = ({rightIcon:RightIcon, title}) => {

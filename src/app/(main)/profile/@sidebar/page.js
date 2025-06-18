@@ -3,10 +3,10 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-import Nav from '@/components/features/main/Nav'
-import Header from '@/components/features/main/Header'
-import ItemSorter from '@/components/features/main/ItemSorter'
-import ProfileEmptyState from '@/components/features/main/ProfileEmptyState'
+import Nav from '@/components/features/main/common/Nav'
+import Header from '@/components/features/main/common/Header'
+import ItemSorter from '@/components/features/main/common/ItemSorter'
+import ProfileEmptyState from '@/components/features/main/profile/ProfileEmptyState'
 
 import Filter from '@/components/icons/header/Filter'
 import Logout from '@/components/icons/header/Logout'

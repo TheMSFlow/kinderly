@@ -13,6 +13,7 @@ const variants = {
   warning: 'bg-transparent border border-btn-warning-border hover:bg-btn-warning-hover text-btn-warning-text',
   ghost: 'bg-transparent text-btn-ghost hover:text-btn-ghost-hover underline',
   wide: 'bg-btn-wide hover:bg-btn-wide-hover text-white w-full',
+  event: 'bg-slate-800 text-white hover:bg-slate-900 gap-2',
 };
 
 const Button = ({
