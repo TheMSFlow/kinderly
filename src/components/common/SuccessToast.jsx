@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 
-const Toast = ({ message, duration = 3000, onClose }) => {
+const SuccessToast = ({ message, duration = 3000, onClose }) => {
   useEffect(() => {
     if (!message) return
 
@@ -14,10 +14,10 @@ const Toast = ({ message, duration = 3000, onClose }) => {
   if (!message) return null
 
   return (
-    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-red-800 text-white px-5 py-3 rounded shadow-lg text-sm z-50">
+    <div className="fixed top-1 left-1/2 transform -translate-x-1/2 bg-[#00513C] text-white px-5 py-3 rounded shadow-lg text-sm z-50">
       {message}
     </div>
   )
 }
 
-export default Toast 
+export default SuccessToast 

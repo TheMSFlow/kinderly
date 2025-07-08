@@ -29,12 +29,13 @@ const EventCard = ({name, title, event = 'BirthDay', view = 'detailed', timeLeft
         GrandMothersDay: <GrandMothersDay />,
         GrandAnniversary: <GrandAnniversary />
     }
+    
 
   return (
     <>
-    <div className='flex flex-col gap-8 justify-center items-center'>
+    <div className='flex flex-col gap-8 justify-center items-center px-4 lg:px-0'>
         {/* Detailed card */}
-        <div className='mx-4 lg:mx-0 w-full lg:w-[21.875rem] h-auto flex flex-col gap-6 bg-gradient-to-b from-slate-300 to-slate-400 p-4 rounded-lg text-slate-800'>
+        <div className='w-full lg:w-[21.875rem] h-auto flex flex-col gap-6 bg-gradient-to-b from-slate-300 to-slate-400 p-4 rounded-lg text-slate-800'>
             <div className='flex flex-row justify-between items-center'>
                 <div className='flex flex-row justify-center items-center gap-[0.625rem]'>
                     <div className='w-10 h-10 rounded-full bg-slate-100 grid place-items-center bg-gradient-to-b from-slate-300 to-slate-400 border-2 border-[#0F1D62]'>

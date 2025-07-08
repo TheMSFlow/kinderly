@@ -12,24 +12,29 @@
   --bg-secondary-sidebar: theme('colors.slate.800');
   --bg-auth: theme('colors.slate.300');
   --bg-modal: theme('colors.slate.600');
+  --bg-modal-backdrop: theme('colors.slate.900 / 50%');
   --bg-dropdown: theme('colors.slate.100');
+  --bg-form-modal: theme('colors.slate.400 / 80%');
   --bg-header: theme('colors.slate.200 / 15%');
   --bg-nav: theme('colors.slate.900 / 15%');
 
+  --kinderly-text: theme('colors.slate.900 / 20%');
   --heading: theme('colors.slate.900');
   --text-primary: theme('colors.slate.900');
   --text-secondary: theme('colors.slate.700');
   --text-tertiary: theme('colors.slate.800');
 
-  --b-border: theme('colors.slate.400');
+  --b-border: theme('colors.slate.300');
+  --line-border: theme('colors.slate.400 / 50%');
   --input-bg: theme('colors.slate.50');
   --input-border: theme('colors.slate.200');
   --input-text: theme('colors.slate.700');
   --placeholder-text: theme('colors.slate.400');
 
-  --nav-default: theme('colors.slate.900');
-  --nav-hover: theme('colors.slate.500');
-  --nav-active: theme('colors.slate.700');
+  --nav-default: theme('colors.slate.600');
+  --nav-hover: theme('colors.slate.900 / 20%');
+  --nav-active: theme('colors.slate.800');
+  --nav-active-bg: theme('colors.slate.900 / 5%');
 
   --icon-default: theme('colors.slate.900');
   --icon-hover: theme('colors.slate.500');
@@ -67,24 +72,29 @@
   --bg-secondary-sidebar: theme('colors.slate.500');
   --bg-auth: theme('colors.slate.800');
   --bg-modal: theme('colors.slate.800');
+  --bg-modal-backdrop: theme('colors.slate.700 / 50%');
   --bg-dropdown: theme('colors.slate.400');
+  --bg-form-modal: theme('colors.slate.700');
   --bg-header: theme('colors.slate.900 / 90%');
   --bg-nav: theme('colors.slate.800 / 90%');
 
+  --kinderly-text: theme('colors.slate.100 / 20%');
   --heading: theme('colors.slate.100');
   --text-primary: theme('colors.slate.100');
   --text-secondary: theme('colors.slate.200');
   --text-tertiary: theme('colors.slate.400');
 
-  --b-border: theme('colors.slate.600');
+  --b-border: theme('colors.slate.500 / 20%');
+  --line-border: theme('colors.slate.700');
   --input-bg: theme('colors.slate.700');
   --input-border: theme('colors.slate.600');
   --input-text: theme('colors.slate.100');
   --placeholder-text: theme('colors.slate.400');
 
-  --nav-default: theme('colors.slate.100');
-  --nav-hover: theme('colors.slate.300');
-  --nav-active: theme('colors.slate.500');
+  --nav-default: theme('colors.slate.400');
+  --nav-hover: theme('colors.slate.700');
+  --nav-active: theme('colors.slate.200');
+  --nav-active-bg: theme('colors.slate.700 / 30%');
 
   --icon-default: theme('colors.slate.100');
   --icon-hover: theme('colors.slate.500');
@@ -101,9 +111,9 @@
   --btn-tertiary-border: theme('colors.slate.50');
   --btn-tertiary-hover: theme('colors.slate.900');
   --btn-tertiary-text: theme('colors.slate.50');  
-  --btn-warning-border: theme('colors.red.100');
+  --btn-warning-border: theme('colors.slate.100');
   --btn-warning-hover: theme('colors.red.800');
-  --btn-warning-text: theme('colors.red.100');  
+  --btn-warning-text: theme('colors.slate.100');  
   --btn-ghost: theme('colors.slate.200');
   --btn-ghost-hover: theme('colors.slate.400');  
   --btn-wide: theme('colors.slate.700');

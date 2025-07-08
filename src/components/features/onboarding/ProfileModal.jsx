@@ -58,7 +58,8 @@ const [member, setMember] = useState({
       console.log('Profile Submitted:', member)
       onComplete(member)
       onClose()
-      router.push('/onboarding/finish')
+      router.push(`/onboarding/finish?index=${selectedIndex}`)
+
     }
   }
 
@@ -104,8 +105,8 @@ const [member, setMember] = useState({
         ) : (
           <>
             <div>
-              <h2 className="text-xl font-playfair mb-1">Complete your profile setup</h2>
-              <p className="text-sm text-slate-50 mb-6">Enter your birthday and gender</p>
+              <h2 className="text-xl font-playfair mb-1">Hi {member.name}, you're almost done</h2>
+              <p className="text-xs text-slate-50 mb-6">Enter your birthday and gender</p>
               <div className="grid grid-cols-3 w-full gap-2 mb-3">
                 <div className='relative w-full'>
                     <select

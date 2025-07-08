@@ -2,8 +2,10 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
+import { supabase } from '@/supabaseClient'
+
 import Button from '@/components/common/Button'
-import Toast from '@/components/common/Toast'
+import Toast from '@/components/common/ErrorToast'
 
 
 
@@ -12,8 +14,6 @@ const roles = [
   'Mother',
   'Guardian',
   'Child',
-  'Brother',
-  'Sister',
   'Aunty',
   'Uncle',
   'Nephew',
@@ -25,10 +25,24 @@ const roles = [
   'Grandmother',
 ]
 
+const generateCallSign = (name, title) => {
+  switch (title) {
+    case 'Father': return 'Dad'
+    case 'Mother': return 'Mom'
+    case 'Guardian': return `Mr/Ms`
+    case 'Aunty': return `Aunty ${name}`
+    case 'Uncle': return `Uncle ${name}`
+    case 'Grandfather': return 'Grandpa'
+    case 'Grandmother': return 'Grandma'
+    default: return name
+  }
+}
+
 const KindredForm = () => {
   const [kindredName, setKindredName] = useState('')
   const [members, setMembers] = useState(Array(6).fill({ name: '', role: '' }))
   const [toastMessage, setToastMessage] = useState('')
+  const router =  useRouter();
 
   const handleMemberChange = (index, key, value) => {
     const updated = [...members]
@@ -61,22 +75,65 @@ const validateForm = () => {
 }
 
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+const handleSubmit = async (e) => {
+  e.preventDefault()
 
-    if (!validateForm()) {
-      setTimeout(() => setToastMessage(''), 3000)
-      return
-    }
-
-    localStorage.setItem('FamilyName', kindredName)
-    localStorage.setItem('KindredMembers', JSON.stringify(members))
-    
-    router.push('/onboarding/profile')
+  if (!validateForm()) {
+    setTimeout(() => setToastMessage(''), 3000)
+    return
   }
 
+  const validProfiles = members.filter((m) => m.name.trim() !== '')
 
-  const router =  useRouter();
+  // 🔐 Get authenticated user (kindred)
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) {
+    setToastMessage('Could not authenticate user.')
+    return
+  }
+
+  // ✅ Update kindred name
+  const { error: kindredError } = await supabase
+    .from('kindred')
+    .update({ name: kindredName })
+    .eq('id', user.id)
+
+  if (kindredError) {
+    setToastMessage('Failed to update Kindred name.')
+    return
+  }
+
+  // 🧠 Transform profiles into kin rows
+  const kinInserts = validProfiles.map((p) => ({
+    kindred_id: user.id,
+    name: p.name,
+    role: p.role,
+    callsign: generateCallSign(p.name, p.role),
+  }))
+
+  console.log('View Kin inserts here:', kinInserts)
+
+
+const { data, error: kinError } = await supabase
+  .from('kin')
+  .insert(kinInserts)
+
+if (kinError) {
+  console.error('Supabase Insert Error:', kinError)
+  console.log('Payload Sent:', kinInserts)
+}
+
+
+  // 🔐 Store in localStorage for next step
+  localStorage.setItem('FamilyName', kindredName)
+  localStorage.setItem('KindredMembers', JSON.stringify(validProfiles))
+
+  // ➡️ Proceed
+  router.push('/onboarding/profile')
+}
+
+
+
 
   return (
     <>

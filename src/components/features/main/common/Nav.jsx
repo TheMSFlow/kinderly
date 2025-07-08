@@ -3,6 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 
 import Home from '../../../icons/footer/Home'
 import HomeActive from '../../../icons/footer/HomeActive'
@@ -14,6 +15,7 @@ import Add from '@/components/icons/footer/Add'
 
 const Nav = () => {
   const pathname = usePathname()
+  const router = useRouter();
 
   const navItems = [
     {
@@ -39,15 +41,17 @@ const Nav = () => {
    
   if (pathname === '/profile') {
     return (
-      <button className='absolute bottom-4 w-auto h-[6rem] flex gap-[10px] items-center justify-between bg-bg-nav backdrop-blur-[15px] text-sm px-8 rounded-full'>
+      <button 
+      onClick={() => router.push('/profile/create')}
+      className='absolute bottom-4 w-60 h-20 flex gap-2 items-center justify-center bg-bg-nav backdrop-blur-[15px] text-sm px-8 py-4 rounded-full'>
         <Add />
-        <p className='font-playfair text-2xl'>Create item</p>
+        <p className='font-playfair text-lg'>Create item</p>
       </button>
     )
   }
 
   return (
-    <div className='absolute bottom-4 w-auto h-[6rem] flex gap-8 items-center justify-between bg-bg-nav backdrop-blur-[15px] text-sm px-8 rounded-full'>
+    <div className='absolute bottom-4 w-auto flex gap-4 items-center justify-between bg-bg-nav backdrop-blur-[15px] text-sm px-8 py-4 rounded-full'>
       {navItems.map(({ href, label, icon, activeIcon }) => {
         const isActive = pathname === href
         return (
@@ -55,13 +59,13 @@ const Nav = () => {
             aria-current={isActive ? 'page' : undefined}
             key={href}
             href={href}
-            className={`flex flex-col gap-1 items-center justify-center w-[3rem]
-                ${isActive ? 'text-nav-active' : 'text-nav-default hover:text-nav-hover active:text-nav-active'}`}
+            className={`flex flex-col items-center justify-center w-12 h-12 text-xs rounded-lg  
+                ${isActive ? 'text-nav-active bg-nav-active-bg' : 'text-nav-default hover:bg-nav-hover active:text-nav-active'}`}
           >
             {isActive ? activeIcon : icon}
             <p
                 className={`
-                ${label === 'Yaay!' && isActive ? 'text-[#00A6ED]' : ''}
+                ${label === 'Yaay!' && isActive ? 'text-text-primary' : ''}
                 `}
             >
                 {label}

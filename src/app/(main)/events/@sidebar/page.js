@@ -7,6 +7,8 @@ import Filter from '@/components/icons/header/Filter'
 
 import ViewSorter from '@/components/features/main/event/ViewSorter'
 import EventCard from '@/components/features/main/event/EventCard'
+import ContentWrapSidebar from '@/components/features/main/common/ContentWrapSidebar'
+import EventDefaultState from '@/components/features/main/event/EventDefaultState'
 
 const EventsSidebar = () => {
     const [rightModal, setRightModal] = useState(false);
@@ -22,15 +24,10 @@ const EventsSidebar = () => {
         title={'Upcoming Events'}
         onRightClick={handleRightIconClick}
         />
-        {rightModal && <div className='absolute z-50 top-20 right-4'> <ViewSorter /> </div>}
-        <div className='h-full w-full flex justify-center items-start overflow-hidden overflow-y-auto hide-scrollbar pt-12 lg:pt-[6rem] pb-[8rem]'>
-          <EventCard 
-            name={'Michael'}
-            title={'Dad'}
-            timeLeft={29}
-            content={"What are you planning? Remember it’s about how much you do, but how much thoughtfulness you put into what you do. See dad’s wish list for more ideas."}
-          />
-        </div>
+        {rightModal && <div className='absolute z-50 top-[4rem] lg:top-[4.5rem] right-4'> <ViewSorter /> </div>}
+        <ContentWrapSidebar>
+          <EventDefaultState sidebar={true}/>
+        </ContentWrapSidebar>
         <div className='flex items-center justify-center w-full'>
           <Nav />
         </div>

@@ -8,19 +8,19 @@ const baseStyles = 'bg-[linear-gradient(180deg,_theme(colors.slate.300),_theme(c
 const variants = {
   small: {
     className: 'w-[6.25rem] h-[6.25rem]',
-    src: '/assets/icons/face-sm.svg',
+    src: '/assets/face-sm.svg',
     width: 63.3,
     height: 52,
   },
   large: {
     className: 'w-[9.375rem] h-[9.375rem]',
-    src: '/assets/icons/face-lg.svg',
+    src: '/assets/face-lg.svg',
     width: 81.5,
     height: 66,
   }
 };
 
-const KinAvatar = ({profile, onClick}) => {
+const KinAvatar = ({profile, showImage = false, onClick}) => {
   const [currentVariant, setCurrentVariant] = useState('small');
 
   useEffect(() => {
@@ -37,11 +37,10 @@ const KinAvatar = ({profile, onClick}) => {
 
   return (
     <button
-    onClick={onClick}
-      type="button"
+      onClick={onClick}
       className={`${baseStyles} ${className} rounded-lg grid place-items-center`}
     >
-      {profile && <Image src={src} width={width} height={height} alt="Kin avatar" />}
+      {profile && showImage && <Image src={src} width={width} height={height} alt="" />}
     </button>
   );
 }

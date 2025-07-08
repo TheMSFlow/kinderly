@@ -10,6 +10,7 @@ import ItemSorter from '@/components/features/main/common/ItemSorter'
 
 import Kindred from '@/components/icons/header/Kindred'
 import Filter from '@/components/icons/header/Filter'
+import ContentWrapSidebar from '@/components/features/main/common/ContentWrapSidebar'
 
 const DashboardSidebar = () => {
   const [leftModal, setLeftModal] = useState(false);
@@ -39,11 +40,11 @@ const DashboardSidebar = () => {
         onLeftClick={handleLeftIconClick}
         onRightClick={handleRightIconClick}
         />
-        {leftModal && <div className='absolute z-50 top-20 left-4'> <KindredSorter /> </div>}
-        {rightModal && <div className='absolute z-50 top-20 right-4'> <ItemSorter /> </div>}
-        <div className='h-full w-full flex justify-center items-start overflow-hidden overflow-y-auto hide-scrollbar pt-12 lg:pt-[6rem] pb-[8rem]'>
+        {leftModal && <div className='absolute z-50 top-[4rem] lg:top-[4.5rem] left-4'> <KindredSorter /> </div>}
+        {rightModal && <div className='absolute z-50 top-[4rem] lg:top-[4.5rem] right-4'> <ItemSorter /> </div>}
+        <ContentWrapSidebar>
           <HomeEmptyState />
-        </div>
+        </ContentWrapSidebar>
         <div className='flex items-center justify-center w-full'>
         <Nav />
         </div>

@@ -1,8 +1,9 @@
+import KinderlyText from '@/components/common/KinderlyText'
 import React from 'react'
 
 const DashboardMain = () => {
   return (
-    <h1>Dashboard Main</h1>
+    <KinderlyText />
     
   )
 }

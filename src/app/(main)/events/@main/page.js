@@ -1,8 +1,17 @@
+'use client'
+
 import React from 'react'
+import ContentWrapMain from '@/components/features/main/common/ContentWrapMain'
+import EventDefaultState from '@/components/features/main/event/EventDefaultState'
 
 const EventsMain = () => {
+ 
   return (
-    <div>Events Main</div>
+    <>
+          <ContentWrapMain>
+            <EventDefaultState main={true}/>
+          </ContentWrapMain>
+    </>
   )
 }
 

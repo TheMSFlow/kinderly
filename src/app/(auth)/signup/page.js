@@ -1,19 +1,34 @@
 "use client"
 
 import Button from '@/components/common/Button'
-import React from 'react'
+import React, { useState } from 'react'
 import Mail from '@/components/icons/Mail'
 import OrSeparator from '@/components/common/OrSeparator'
 import AuthForm from '@/components/features/auth/AuthForm'
 
+import { supabase } from '@/supabaseClient'
+
 const Register = () => {
-    const handleLogin = () => {
+        const [loading, setLoading] = useState(false)
 
-    }
+        const handleGoogleSignup = () => {
+        if (loading) return
+        setLoading(true)
 
-    const handleSignup = () => {
+        const { error } = supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+            redirectTo: `${window.location.origin}/auth/callback`
+            }
+        })
 
-    }
+        if (error) {
+            console.error('Google signup error:', error)
+            setLoading(false)
+        }
+        }
+
+
   return (
     <>
         <section className='flex justify-center items-center bg-bg-primary min-h-[100svh] md:min-h-screen'>
@@ -26,8 +41,13 @@ const Register = () => {
                     {/* <Button className={'w-full'} iconLeft={Mail}>
                         Sign up with Apple
                     </Button> */}
-                    <Button className={'w-full'} iconLeft={Mail}>
-                        Sign up with Google
+                    <Button
+                        onClick={handleGoogleSignup}
+                        className={'w-full'}
+                        iconLeft={Mail}
+                        disabled={loading}
+                        >
+                        {loading ? 'Redirecting...' : 'Sign up with Google'}
                     </Button>
                 </div>
                 <OrSeparator />

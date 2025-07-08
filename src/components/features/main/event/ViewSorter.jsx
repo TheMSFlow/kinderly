@@ -6,7 +6,7 @@ import Detailed from '@/components/icons/filter/Detailed'
 
 const ViewSorter = () => {
   return (
-    <div className='flex flex-col w-[12.5rem] justify-center items-center rounded-lg bg-[linear-gradient(137deg,_#0F172A_4.17%,_#334155_89.8%)] backdrop-blur-[15px] font-light text-sm'>
+    <div className='flex flex-col w-[13rem] justify-center items-center rounded-lg bg-[linear-gradient(137deg,_#0F172A_4.17%,_#334155_89.8%)] backdrop-blur-[15px] font-light text-sm px-1'>
         <div className='flex h-12 w-full justify-center items-center border-b-2 border-slate-800 text-slate-50 font-normal'> 
           View
         </div>

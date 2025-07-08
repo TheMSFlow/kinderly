@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import Nav from '@/components/features/main/common/Nav'
@@ -11,26 +11,34 @@ import ProfileEmptyState from '@/components/features/main/profile/ProfileEmptySt
 import Filter from '@/components/icons/header/Filter'
 import Logout from '@/components/icons/header/Logout'
 import Home from '@/components/icons/header/Home'
+import ContentWrapSidebar from '@/components/features/main/common/ContentWrapSidebar'
+import ItemCard from '@/components/features/main/profile/ItemCard'
 
 const ProfileSidebar = () => {
       const router = useRouter();
       const [rightModal, setRightModal] = useState(false);
+      const [wishlist, setWishlist] = useState([])
+      const [openItemId, setOpenItemId] = useState(null)
 
-      const handleLeftIconClick = () => {
-        router.push('/dashboard');
+  useEffect(() => {
+    const stored = localStorage.getItem('wishlist')
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored)
+        setWishlist(Array.isArray(parsed) ? parsed : [])
+      } catch {
+        setWishlist([])
       }
-
-      const handleRightIconClick = () => {
-        setRightModal(prev => !prev);
-      }
-
-    const handleSecondRightIconClick = () => {
-      router.push('/login');
     }
+  }, [])
+
+  const handleLeftIconClick = () => router.push('/dashboard')
+  const handleRightIconClick = () => setRightModal(prev => !prev)
+  const handleSecondRightIconClick = () => router.push('/kindred')
 
   return (
     <>
-      <div className='relative h-full w-full grid grid-rows-[6rem_1fr] lg:grid-rows-[5rem_1fr]'>
+      <div className='relative h-full w-full'>
         <Header
         leftIcon={Home}
         rightIcon={Filter} 
@@ -40,10 +48,33 @@ const ProfileSidebar = () => {
         onRightClick={handleRightIconClick}
         onSecondRightClick={handleSecondRightIconClick}
         />
-        {rightModal && <div className='absolute z-10 top-20 right-4'> <ItemSorter /> </div>}
-        <div className='flex justify-center items-start h-full'>
-          <ProfileEmptyState />
-        </div>
+        {rightModal && (
+          <div className='absolute z-10 top-20 right-4'> 
+            <ItemSorter onClose={() => setRightModal(false)} /> 
+          </div>
+        )}
+        <ContentWrapSidebar>
+          {wishlist.length > 0 ? (
+          <div className='flex flex-col gap-20 pt-6 w-full px-4 lg:hidden'>
+            {wishlist.map((item, index) => (
+              <ItemCard
+                key={item.id}
+                id={item.id}
+                itemImage={item.photo}
+                itemTitle={item.name}
+                itemAmount={item.amount}
+                itemReason={item.reason}
+                itemLink={item.link}
+                itemContact={item.phone}
+                openItemId={openItemId}
+                setOpenItemId={setOpenItemId}
+              />
+            ))}
+          </div>
+        ) : (
+          <ProfileEmptyState sidebar={true} />
+        )}
+        </ContentWrapSidebar>
         <div className='flex items-center justify-center w-full'>
           <Nav />
         </div>
