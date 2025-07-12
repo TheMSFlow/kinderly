@@ -1,4 +1,5 @@
 'use client'
+
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -88,7 +89,7 @@ const handleSubmit = async (e) => {
   // 🔐 Get authenticated user (kindred)
   const { data: { user }, error: userError } = await supabase.auth.getUser()
   if (userError || !user) {
-    setToastMessage('Could not authenticate user.')
+    setToastMessage('Could not find your kindred.')
     return
   }
 
@@ -114,14 +115,33 @@ const handleSubmit = async (e) => {
   console.log('View Kin inserts here:', kinInserts)
 
 
-const { data, error: kinError } = await supabase
+// 🧠 Get existing kin for this kindred
+const { data: existingKin, error: fetchError } = await supabase
   .from('kin')
-  .insert(kinInserts)
+  .select('name')
+  .eq('kindred_id', user.id)
 
-if (kinError) {
-  console.error('Supabase Insert Error:', kinError)
-  console.log('Payload Sent:', kinInserts)
+if (fetchError) {
+  setToastMessage('Error checking existing profiles.')
+  return
 }
+
+const existingNames = existingKin?.map(k => k.name.toLowerCase()) || []
+
+// 🚫 Filter out any duplicates (case-insensitive)
+const newKin = kinInserts.filter(k => !existingNames.includes(k.name.toLowerCase()))
+
+if (newKin.length === 0) {
+  setToastMessage('All profiles already exist.')
+} else {
+  const { error: kinError } = await supabase.from('kin').insert(newKin)
+  if (kinError) {
+    console.error('Insert error:', kinError)
+    setToastMessage('Error creating kin profiles.')
+    return
+  }
+}
+
 
 
   // 🔐 Store in localStorage for next step

@@ -6,6 +6,11 @@ import KinAvatar from '@/components/features/onboarding/KinAvatar'
 import AddNewKin from '@/components/features/main/profile/AddNewKin'
 import PinRequestModal from '@/components/features/auth/PinRequestModal'
 
+import { supabase } from '@/supabaseClient'
+
+import bcrypt from 'bcryptjs'
+
+
 const Kindred = () => {
   const [familyName, setFamilyName] = useState('')
   const [members, setMembers] = useState([])
@@ -16,20 +21,61 @@ const Kindred = () => {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    const storedFamilyName = localStorage.getItem('FamilyName') || ''
-    setFamilyName(storedFamilyName)
-
+  const loadData = async () => {
+    const storedFamilyName = localStorage.getItem('FamilyName')
     const storedMembers = localStorage.getItem('KindredMembers')
-    if (storedMembers) {
+
+    // If data is already in localStorage, use it
+    if (storedFamilyName && storedMembers) {
+      setFamilyName(storedFamilyName)
       try {
         setMembers(JSON.parse(storedMembers))
       } catch {
         setMembers([])
       }
-    } else {
-      setMembers([])
+      return
     }
-  }, [])
+
+    // Fetch from Supabase
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    if (userError || !user) return
+
+    // ✅ Get kindred name
+    const { data: kindred, error: kindredError } = await supabase
+      .from('kindred')
+      .select('name')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    // ✅ Get kin members
+    const { data: kinMembers, error: kinError } = await supabase
+      .from('kin')
+      .select('name, role')
+      .eq('kindred_id', user.id)
+
+    if (kindredError || kinError) return
+
+    // Store into state and localStorage
+    setFamilyName(kindred?.name || '')
+    localStorage.setItem('FamilyName', kindred?.name || '')
+
+    const transformed = kinMembers.map(k => ({
+      name: k.name,
+      role: k.role,
+      month: '',
+      day: '',
+      year: '',
+      gender: '',
+      pin: ''
+    }))
+
+    setMembers(transformed)
+    localStorage.setItem('KindredMembers', JSON.stringify(transformed))
+  }
+
+  loadData()
+}, [])
+
 
   // ✅ Open PIN modal if ?index=... param is passed
   useEffect(() => {
@@ -111,13 +157,46 @@ const Kindred = () => {
             setPinModalIndex(null)
             setPinError('')
           }}
-          onSubmit={(enteredPin) => {
-            const correctPin = members[pinModalIndex]?.pin || ''
-            if (enteredPin === correctPin) {
-              router.push('/dashboard')
-            } else {
-              setPinError('Incorrect PIN, try again.')
+          onSubmit={async (enteredPin) => {
+            const { data: { user } } = await supabase.auth.getUser()
+
+            const member = members[pinModalIndex]
+            const { data: kin, error } = await supabase
+              .from('kin')
+              .select('id, pin, name, callsign, role, dob, gender')
+              .eq('kindred_id', user.id)
+              .eq('name', member.name)
+              .eq('role', member.role)
+              .maybeSingle()
+
+            if (error || !kin) {
+              setPinError('Failed to verify PIN.')
+              return
             }
+
+            const isMatch = await bcrypt.compare(enteredPin, kin.pin)
+              if (!isMatch) {
+                setPinError('Incorrect PIN, try again.')
+                return
+              }
+
+
+            // ✅ Save selectedKin cookie
+            const selectedKin = {
+              id: kin.id,
+              name: kin.name,
+              role: kin.role,
+              dob: kin.dob,
+              gender: kin.gender,
+              callsign: kin.callsign,
+              pin: enteredPin
+            }
+
+            document.cookie = `selectedKin=${encodeURIComponent(JSON.stringify(selectedKin))}; Path=/; Max-Age=2592000; SameSite=Lax`
+
+            // ✅ Redirect
+            router.push('/dashboard')
+
           }}
           error={pinError}
         />

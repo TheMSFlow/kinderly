@@ -18,7 +18,7 @@ const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i
 const days = Array.from({ length: 31 }, (_, i) => i + 1)
 const genders = ['Male', 'Female']
 
-const ProfileModal = ({ profile, data = {}, onClose, onComplete }) => {
+const ProfileModal = ({ profile, data = {}, onClose, onComplete, selectedIndex }) => {
   const router = useRouter()
   const modalRef = useRef(null)
   const [step, setStep] = useState(profile ? 2 : 1)
@@ -58,7 +58,6 @@ const [member, setMember] = useState({
       console.log('Profile Submitted:', member)
       onComplete(member)
       onClose()
-      router.push(`/onboarding/finish?index=${selectedIndex}`)
 
     }
   }

@@ -6,14 +6,16 @@ import { useRouter } from 'next/navigation'
 import Button from '@/components/common/Button'
 
 import { supabase } from '@/supabaseClient'
+import bcrypt from 'bcryptjs'
 
 const Finish = () => {
   const router = useRouter()
+  const searchParams = useSearchParams()
+
   const [pin, setPin] = useState(['', '', '', ''])
   const [error, setError] = useState('')
   const [memberName, setMemberName] = useState('')
-
-  const searchParams = useSearchParams()
+  const [submitting, setSubmitting] = useState(false)
 
   // ✅ Get selected member's name for greeting
   useEffect(() => {
@@ -40,19 +42,25 @@ const Finish = () => {
 
 const handleSubmit = async (e) => {
   e.preventDefault()
+  setSubmitting(true)
 
+  // Check full PIN
   if (pin.some((digit) => digit === '')) {
     setError('Enter a complete 4-digit PIN')
+    setSubmitting(false)
     setTimeout(() => setError(''), 3000)
     return
   }
 
   const pinCode = pin.join('')
+  const hashedPin = await bcrypt.hash(pinCode, 10)
+
   const storedMembers = JSON.parse(localStorage.getItem('KindredMembers') || '[]')
   const selectedIndex = parseInt(searchParams.get('index') || '-1', 10)
 
   if (isNaN(selectedIndex) || !storedMembers[selectedIndex]) {
     setError('Could not find profile. Please restart onboarding.')
+    setSubmitting(false)
     return
   }
 
@@ -60,18 +68,32 @@ const handleSubmit = async (e) => {
   selectedMember.pin = pinCode
 
   const { name, role, gender, month, day, year } = selectedMember
-  const dob = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
 
+  // Convert month to numeric and build dob
+  const monthIndex = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ].indexOf(month) + 1
+
+  const dob = `${year}-${String(monthIndex).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+
+  const isValidDate = (dateString) => {
+    const d = new Date(dateString)
+    return !isNaN(d.getTime())
+  }
+
+  // Authenticate user
   const { data: { user }, error: userError } = await supabase.auth.getUser()
   if (userError || !user) {
     setError('Could not authenticate user.')
+    setSubmitting(false)
     return
   }
 
-  // First try to find an existing kin row
+  // Check if Kin already exists
   const { data: existingKin, error: fetchError } = await supabase
     .from('kin')
-    .select('id')
+    .select('id, gender, dob, pin')
     .eq('kindred_id', user.id)
     .eq('name', name)
     .eq('role', role)
@@ -80,70 +102,88 @@ const handleSubmit = async (e) => {
   if (fetchError) {
     console.error(fetchError)
     setError('Error checking for existing profile.')
+    setSubmitting(false)
     return
   }
 
-  const fieldsToSave = {
-    kindred_id: user.id,
+  let finalKinId
+
+  if (existingKin) {
+    // Update only missing fields
+    const updateData = {}
+
+    if ((existingKin.gender === null || existingKin.gender === '') && gender?.trim()) {
+      updateData.gender = gender
+    }
+
+    if ((existingKin.dob === null || existingKin.dob === '') && isValidDate(dob)) {
+      updateData.dob = dob
+    }
+
+    if ((existingKin.pin === null || existingKin.pin === '') && pinCode) {
+      updateData.pin = hashedPin
+    }
+
+    if (Object.keys(updateData).length > 0) {
+      const { error: updateError } = await supabase
+        .from('kin')
+        .update(updateData)
+        .eq('id', existingKin.id)
+
+      if (updateError) {
+        console.error(updateError)
+        setError('Error updating profile.')
+        setSubmitting(false)
+        return
+      }
+    }
+
+    finalKinId = existingKin.id
+  } else {
+    // Insert new Kin
+    const { data: insertedKin, error: insertError } = await supabase
+      .from('kin')
+      .insert({
+        kindred_id: user.id,
+        name,
+        role,
+        gender: gender?.trim(),
+        dob: isValidDate(dob) ? dob : null,
+        pin: hashedPin,
+        callsign: selectedMember.callsign || name,
+      })
+      .select('id')
+
+    if (insertError || !insertedKin?.[0]) {
+      console.error(insertError)
+      setError('Failed to create profile.')
+      setSubmitting(false)
+      return
+    }
+
+    finalKinId = insertedKin[0].id
+  }
+
+  // Store selected kin in cookie
+  const selectedKin = {
+    id: finalKinId,
     name,
     role,
-    gender: gender,
-    dob: dob,
+    callsign: selectedMember.callsign || name,
+    dob,
+    gender,
     pin: pinCode,
   }
 
-  let dbError = null
-  let insertedKin = null
-
-  if (existingKin) {
-    // 👇 Update existing
-    const { error } = await supabase
-      .from('kin')
-      .update(fieldsToSave)
-      .eq('id', existingKin.id)
-
-    dbError = error
-  } else {
-    // 👇 Create new
-    const { data, error } = await supabase
-      .from('kin')
-      .insert(fieldsToSave)
-      .select('id')  // important to retrieve inserted id
-
-    insertedKin = data
-    dbError = error
-  }
+  document.cookie = `selectedKin=${encodeURIComponent(JSON.stringify(selectedKin))}; Path=/; Max-Age=2592000; SameSite=Lax; Secure`
 
 
-  if (dbError) {
-    console.error(dbError)
-    setError('Failed to save profile. Please try again.')
-    return
-  }
+  localStorage.removeItem('KindredMembers')
 
-  // ✅ Store selected kin in cookie (safe subset)
-const selectedKin = {
-  id: existingKin?.id || insertedKin?.[0]?.id,
-  name,
-  role,
-  callsign: selectedMember.callsign,
-  dob,
-  gender,
-  pin: pinCode,
-}
-
-document.cookie = `selectedKin=${encodeURIComponent(JSON.stringify(selectedKin))}; Path=/; Max-Age=2592000; SameSite=Lax`
-
-
-
-  // ✅ Store updated member in localStorage
-  storedMembers[selectedIndex] = selectedMember
-  localStorage.setItem('KindredMembers', JSON.stringify(storedMembers))
-  localStorage.setItem(`Completed:${selectedMember.name}`, 'true')
-
-  // ✅ Redirect
   router.push('/dashboard')
 }
+
+
 
 
 
@@ -184,8 +224,8 @@ document.cookie = `selectedKin=${encodeURIComponent(JSON.stringify(selectedKin))
           <div className="flex flex-col justify-end h-[100px]">
             {error && <p className="text-red-500 text-sm font-medium mb-8">{error}</p>}
 
-            <Button variant="wide" type='submit'>
-              Done
+            <Button variant="wide" type="submit" disabled={submitting}>
+              {submitting ? 'Finishing...' : 'Done'}
             </Button>
           </div>
         </form>

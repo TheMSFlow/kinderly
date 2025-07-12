@@ -1,34 +1,92 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 
 import KinAvatar from '@/components/features/onboarding/KinAvatar'
 import AddNewKin from '@/components/features/main/profile/AddNewKin'
 import ProfileModal from '@/components/features/onboarding/ProfileModal'
 
+import { getCompletedKin } from '@/utils/getCompletedKin'
+import { supabase } from '@/supabaseClient'
+
 const OnboardingProfile = () => {
   const [familyName, setFamilyName] = useState('')
   const [members, setMembers] = useState([])
   const [selectedIndex, setSelectedIndex] = useState(null)
+  const [completedNames, setCompletedNames] = useState([])
+
 
   const searchParams = useSearchParams()
   const router = useRouter()
 
   useEffect(() => {
-    const storedFamilyName = localStorage.getItem('FamilyName') || ''
-    setFamilyName(storedFamilyName)
+  const checkCompletedProfiles = async () => {
+    const completeKin = await getCompletedKin()
+    const completeName = completeKin.map(k => k.name)
+    setCompletedNames(completeName)
+  }
 
+  checkCompletedProfiles()
+}, [])
+
+
+  useEffect(() => {
+  const loadData = async () => {
+    const storedFamilyName = localStorage.getItem('FamilyName')
     const storedMembers = localStorage.getItem('KindredMembers')
-    if (storedMembers) {
+
+    // If data is already in localStorage, use it
+    if (storedFamilyName && storedMembers) {
+      setFamilyName(storedFamilyName)
       try {
         setMembers(JSON.parse(storedMembers))
       } catch {
         setMembers([])
       }
-    } else {
-      setMembers([])
+      return
     }
-  }, [])
+
+    // Fetch from Supabase
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    if (userError || !user) return
+
+    // ✅ Get kindred name
+    const { data: kindred, error: kindredError } = await supabase
+      .from('kindred')
+      .select('name')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    // ✅ Get kin members
+    const { data: kinMembers, error: kinError } = await supabase
+      .from('kin')
+      .select('name, role')
+      .eq('kindred_id', user.id)
+
+    if (kindredError || kinError) return
+
+    // Store into state and localStorage
+    setFamilyName(kindred?.name || '')
+    localStorage.setItem('FamilyName', kindred?.name || '')
+
+    const transformed = kinMembers.map(k => ({
+      name: k.name,
+      role: k.role,
+      callsign: k.callsign || '',
+      month: '',
+      day: '',
+      year: '',
+      gender: '',
+      pin: ''
+    }))
+
+    setMembers(transformed)
+    localStorage.setItem('KindredMembers', JSON.stringify(transformed))
+  }
+
+  loadData()
+}, [])
+
 
   useEffect(() => {
     const index = searchParams.get('index')
@@ -40,7 +98,7 @@ const OnboardingProfile = () => {
         setMembers(prev => {
           const updated = [...prev]
           if (isCreate && !updated[parsedIndex]) {
-            updated[parsedIndex] = { name: '', role: '', month: '', day: '', year: '', gender: '', pin: '' }
+            updated[parsedIndex] = { name: '', role: '', callsign: '', month: '', day: '', year: '', gender: '', pin: '' }
             localStorage.setItem('KindredMembers', JSON.stringify(updated))
           }
           return updated
@@ -52,48 +110,64 @@ const OnboardingProfile = () => {
   }, [searchParams])
 
   const handleProfile = (index) => {
-    const member = members[index]
-    if (!member || !member.name) return
+  const member = members[index]
+  if (!member || !member.name) return
 
-    const isCompleted = localStorage.getItem(`Completed:${member.name}`) === 'true'
+  const isCompleted = completedNames.includes(member.name)
 
-    if (isCompleted) {
-      // ✅ Redirect to Kindred to handle login
-      router.push(`/kindred?index=${index}`)
-    } else {
-      // ✅ Continue onboarding
-      setSelectedIndex(index)
-    }
+  if (isCompleted) {
+    router.push(`/kindred?index=${index}`)
+  } else {
+    setSelectedIndex(index)
   }
+}
+
 
   const handleModalClose = () => {
     setSelectedIndex(null)
   }
 
   const handleModalComplete = (newData) => {
-    const updatedMembers = [...members]
-    updatedMembers[selectedIndex] = newData
-    setMembers(updatedMembers)
-    localStorage.setItem('KindredMembers', JSON.stringify(updatedMembers))
+  const updatedMembers = [...members]
+  const current = updatedMembers[selectedIndex] || {}
 
-    if (newData.name) {
-      window.location.href = `/onboarding/finish?index=${selectedIndex}`
-    }
+  const merged = {
+    ...current,
+    month: newData.month,
+    day: newData.day,
+    year: newData.year,
+    gender: newData.gender,
+    callsign: newData.callsign || current.callsign
+
   }
 
-  const createdMembers = members.filter(m => m.name)
+  updatedMembers[selectedIndex] = merged
+  setMembers(updatedMembers)
+  localStorage.setItem('KindredMembers', JSON.stringify(updatedMembers))
+
+  // ✅ Go to finish step for PIN + Supabase handling
+  router.push(`/onboarding/finish?index=${selectedIndex}`)
+}
+
+
+  const createdMembers = useMemo(() => members.filter(m => m.name), [members])
+
 
   const handleAddNew = () => {
-    const createdMembers = members.filter(m => m.name)
     const newIndex = createdMembers.length
     if (newIndex >= 6) return
 
     setMembers([
       ...members,
-      { name: '', role: '', month: '', day: '', year: '', gender: '', pin: '' },
+      { name: '', role: '', callsign: '', month: '', day: '', year: '', gender: '', pin: '' },
     ])
     setSelectedIndex(newIndex)
   }
+
+  if (!members.length && !localStorage.getItem('KindredMembers')) {
+  return <div className="text-center mt-10">Loading...</div>
+}
+
 
   return (
     <>
@@ -109,7 +183,7 @@ const OnboardingProfile = () => {
 
         <div className='flex flex-wrap gap-8 text-text-primary w-full justify-center items-center px-4'>
           {createdMembers.map((member, i) => {
-            const isCompleted = localStorage.getItem(`Completed:${member.name}`) === 'true'
+            const isCompleted = completedNames.includes(member.name)
 
             return (
               <div key={i} className="flex flex-col items-center gap-2">
@@ -138,6 +212,7 @@ const OnboardingProfile = () => {
           data={members[selectedIndex]}
           onClose={handleModalClose}
           onComplete={handleModalComplete}
+          selectedIndex={selectedIndex}
         />
       )}
     </>

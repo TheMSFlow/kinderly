@@ -2,23 +2,26 @@ import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 
 export async function middleware(req) {
-  console.log('[Middleware] Pathname:', req.nextUrl.pathname)
-  
   const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
   const url = req.nextUrl
+  
+  console.log('[Middleware] Pathname:', req.nextUrl.pathname)
+
+  if (url.pathname.startsWith('/auth/callback')) return res
+
+  const supabase = createMiddlewareClient({ req, res })
 
   const {
     data: { session }
   } = await supabase.auth.getSession()
 
+
   // ✅ Allow homepage publicly
   if (url.pathname === '/') return res
 
-  // ✅ Handle first-time logic
-  const isFirstOpen = req.cookies.get('first_open')?.value !== 'false'
-
+  
   if (!session) {
+    const isFirstOpen = req.cookies.get('first_open')?.value !== 'false'
     url.pathname = isFirstOpen ? '/signup' : '/login'
     return NextResponse.redirect(url)
   }
@@ -30,18 +33,19 @@ export async function middleware(req) {
     .eq('id', session.user.id)
     .maybeSingle()
 
-  if (kindredError || !kindred) {
+  if (kindredError && !url.pathname.startsWith('/onboarding')) {
     console.error('Kindred fetch error in middleware:', kindredError)
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
-  }
-
-  const hasKindredName = kindred.name?.trim()
-
-  if (!hasKindredName && !url.pathname.startsWith('/onboarding')) {
     url.pathname = '/onboarding/start'
     return NextResponse.redirect(url)
   }
+
+  const hasKindredName = kindred?.name?.trim()
+
+  if ((!kindred || !hasKindredName) && !url.pathname.startsWith('/onboarding')) {
+  url.pathname = '/onboarding/start'
+  return NextResponse.redirect(url)
+}
+
 
   if (hasKindredName && url.pathname === '/onboarding/start') {
     url.pathname = '/onboarding/profile'
@@ -64,6 +68,10 @@ export async function middleware(req) {
       const isComplete = selectedKin?.name && selectedKin?.role && selectedKin?.pin
       if (!isComplete) {
         url.pathname = '/kindred'
+        return NextResponse.redirect(url)
+      }
+      if (isComplete && url.pathname === '/kindred') {
+        url.pathname = '/dashboard'
         return NextResponse.redirect(url)
       }
     } catch (err) {
