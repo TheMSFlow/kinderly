@@ -14,6 +14,8 @@ import Home from '@/components/icons/header/Home'
 import ContentWrapSidebar from '@/components/features/main/common/ContentWrapSidebar'
 import ItemCard from '@/components/features/main/profile/ItemCard'
 
+import { kinSwitch } from '@/utils/kinSwitch'
+
 const ProfileSidebar = () => {
       const router = useRouter();
       const [rightModal, setRightModal] = useState(false);
@@ -34,7 +36,9 @@ const ProfileSidebar = () => {
 
   const handleLeftIconClick = () => router.push('/dashboard')
   const handleRightIconClick = () => setRightModal(prev => !prev)
-  const handleSecondRightIconClick = () => router.push('/kindred')
+  const handleSecondRightIconClick = () => {
+    kinSwitch()
+  }
 
   return (
     <>

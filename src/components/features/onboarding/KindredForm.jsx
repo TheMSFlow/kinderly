@@ -26,6 +26,21 @@ const roles = [
   'Grandmother',
 ]
 
+const generateGender = (role) => {
+  switch (role) {
+    case 'Father': return 'Male'
+    case 'Uncle': return 'Male'
+    case 'Nephew': return 'Male'
+    case 'Grandfather': return 'Male'
+    case 'Mother': return 'Female'
+    case 'Aunty': return 'Female'
+    case 'Niece': return 'Female'
+    case 'Grandmother': return 'Female'
+    default: return null
+  }
+}
+
+
 const generateCallSign = (name, title) => {
   switch (title) {
     case 'Father': return 'Dad'
@@ -110,6 +125,7 @@ const handleSubmit = async (e) => {
     name: p.name,
     role: p.role,
     callsign: generateCallSign(p.name, p.role),
+    gender: generateGender(p.role),
   }))
 
   console.log('View Kin inserts here:', kinInserts)
@@ -141,12 +157,6 @@ if (newKin.length === 0) {
     return
   }
 }
-
-
-
-  // 🔐 Store in localStorage for next step
-  localStorage.setItem('FamilyName', kindredName)
-  localStorage.setItem('KindredMembers', JSON.stringify(validProfiles))
 
   // ➡️ Proceed
   router.push('/onboarding/profile')

@@ -1,11 +1,10 @@
-
+import { removeSelectedKin } from "@/app/lib/kinCookies"
 
 export const kinSwitch = async () => {
   try {
 
-    document.cookie = 'selectedKin=; Max-Age=0; Path=/'
-
-    window.location.href = '/kindred'
+    removeSelectedKin()
+    window.location.assign('/kindred')
   } catch (error) {
     console.error('Error during kin switch:', error)
   }
