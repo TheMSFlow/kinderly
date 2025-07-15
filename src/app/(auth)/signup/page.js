@@ -55,7 +55,7 @@ const handleSignupSubmit = async ({ email }) => {
                 <div className='flex flex-row items-center justify-center'>
                     <p className='text-text-secondary text-sm mt-[2px] -mr-1'>Already have an account?</p>
                     <Button 
-                    variant='ghost'
+                    variant='underline'
                     to={'/login'}
                     >
                         Sign In

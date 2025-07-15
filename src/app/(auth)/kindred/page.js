@@ -2,17 +2,23 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import KinAvatar from '@/components/features/onboarding/KinAvatar'
-import AddNewKin from '@/components/features/main/profile/AddNewKin'
+import AddNewKin from '@/components/features/onboarding/AddNewKin'
 import PinRequestModal from '@/components/features/auth/PinRequestModal'
 import { supabase } from '@/supabaseClient'
-import { verifyPin } from '@/app/lib/pinUtils'
+import { verifyPin } from '@/utils/pinUtils'
 import { setSelectedKin } from '@/app/lib/kinCookies'
+import ModalDecision from '@/components/common/ModalDecision'
+import Logout from '@/components/icons/header/Logout'
+import { kinLogout } from '@/utils/kinLogout'
+import Button from '@/components/common/Button'
+
 
 const Kindred = () => {
   const [familyName, setFamilyName] = useState('')
   const [kinList, setKinList] = useState([])
   const [selectedKin, setSelectedKinState] = useState(null)
   const [pinError, setPinError] = useState('')
+  const [signOutModal, setSignOutModal] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -52,9 +58,14 @@ const Kindred = () => {
     router.push('/onboarding/profile?create=true')
   }
 
+  const handleSignOut = () => {
+    kinLogout()
+    setSignOutModal(false)
+  }
+
   return (
     <>
-      <div className="absolute w-full h-12 md:h-[4.5rem] top-0 text-center font-playfair text-[32px] md:text-[40px] border-b border-b-b-border text-heading">
+      <div className="grid place-items-center absolute w-full h-16 md:h-[4.5rem] top-0 font-playfair text-[32px] md:text-[40px] border-b border-b-b-border text-heading">
         {familyName}
       </div>
 
@@ -81,6 +92,16 @@ const Kindred = () => {
           )}
         </div>
       </section>
+
+      <div className="grid place-items-center absolute w-full h-16 md:h-[4.5rem] bottom-0 text-base md:text-xl border-t border-t-b-border text-text-primary">
+        <Button 
+        variant='ghost'
+          onClick={() => setSignOutModal(true)} 
+          className='w-fit gap-2'
+          >
+            <Logout /> Sign Out
+        </Button>
+      </div>
 
       {selectedKin && (
         <PinRequestModal
@@ -127,6 +148,14 @@ const Kindred = () => {
           error={pinError}
         />
       )}
+      <ModalDecision 
+        show={signOutModal}
+        action={'sign out from your kindered?'}
+        noToAction={() => setSignOutModal(false)}
+        noText={'Not now'}
+        yesToAction={handleSignOut}
+        yesText={'Yes, Sign me out'}
+      />
     </>
   )
 }

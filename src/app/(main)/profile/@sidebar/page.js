@@ -14,30 +14,49 @@ import Home from '@/components/icons/header/Home'
 import ContentWrapSidebar from '@/components/features/main/common/ContentWrapSidebar'
 import ItemCard from '@/components/features/main/profile/ItemCard'
 
+import ModalDecision from '@/components/common/ModalDecision'
 import { kinSwitch } from '@/utils/kinSwitch'
+import { getSelectedKin } from '@/app/lib/kinCookies'
+import { supabase } from '@/supabaseClient'
 
 const ProfileSidebar = () => {
       const router = useRouter();
       const [rightModal, setRightModal] = useState(false);
-      const [wishlist, setWishlist] = useState([])
+      const [items, setItems] = useState([])
       const [openItemId, setOpenItemId] = useState(null)
+      const [kinSwitchModal, setKinSwitchModal] = useState(false);
+      
+    useEffect(() => {
+    const fetchItems = async () => {
+      const kin = getSelectedKin()
+      if (!kin?.id) return
 
-  useEffect(() => {
-    const stored = localStorage.getItem('wishlist')
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored)
-        setWishlist(Array.isArray(parsed) ? parsed : [])
-      } catch {
-        setWishlist([])
+      const { data, error } = await supabase
+        .from('items')
+        .select('*')
+        .eq('kin_id', kin.id)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching items:', error)
+        return
       }
+
+      setItems(data)
     }
+
+    fetchItems()
   }, [])
 
   const handleLeftIconClick = () => router.push('/dashboard')
   const handleRightIconClick = () => setRightModal(prev => !prev)
   const handleSecondRightIconClick = () => {
+    setKinSwitchModal(true)
+  }
+
+  const handleKinSwitch = () => {
     kinSwitch()
+    setKinSwitchModal(false)
   }
 
   return (
@@ -58,9 +77,9 @@ const ProfileSidebar = () => {
           </div>
         )}
         <ContentWrapSidebar>
-          {wishlist.length > 0 ? (
+          {items.length > 0 ? (
           <div className='flex flex-col gap-20 pt-6 w-full px-4 lg:hidden'>
-            {wishlist.map((item, index) => (
+            {items.map((item, index) => (
               <ItemCard
                 key={item.id}
                 id={item.id}
@@ -83,6 +102,14 @@ const ProfileSidebar = () => {
           <Nav />
         </div>
       </div>
+      <ModalDecision 
+        show={kinSwitchModal}
+        action={'log out from your profile?'}
+        noToAction={() => setKinSwitchModal(false)}
+        noText={'Not now'}
+        yesToAction={handleKinSwitch}
+        yesText={'Yes, log me out'}
+      />
     </>
   )
 }

@@ -2,48 +2,64 @@
 
 import { useState, useEffect } from 'react';
 import Button from '@/components/common/Button';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import SuccessToast from '@/components/common/SuccessToast';
+
+import { supabase } from '@/supabaseClient'
+import { useSelectedKin } from '@/context/SelectedKinContext';
 
 const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-
   const isEditMode = !!initialData;
-
-  const [formData, setFormData] = useState({
-    id: null,
-    name: '',
-    link: '',
-    phone: '',
-    amount: '',
-    reason: '',
-    photo: null,
-  });
 
   const [errors, setErrors] = useState({});
   const [toastMessage, setToastMessage] = useState('');
+  const [previewImage, setPreviewImage] = useState(null)
+  const [pendingFileUpload, setPendingFileUpload] = useState(null);
+
+  const { kin: selectedKin, loading } = useSelectedKin();
 
   useEffect(() => {
-  if (isEditMode && initialData) {
-    setFormData({
-      id: initialData.id ?? null,
-      name: initialData.name ?? '',
-      link: initialData.link ?? '',
-      phone: initialData.phone ?? '',
-      amount: initialData.amount ?? '',
-      reason: initialData.reason ?? '',
-      photo: initialData.photo ?? null,
-    });
-  }
-}, [initialData, isEditMode]);
+  console.log('🔍 Selected Kin:', selectedKin);
+  console.log('🔢 kin.id:', selectedKin?.id);
+  console.log('🧬 kin.kindred_id:', selectedKin?.kindred_id);
+}, [selectedKin]);
 
 
-  const validate = () => {
+
+  const [formData, setFormData] = useState({
+    id: null,
+    item_name: '',
+    item_link: '',
+    item_contact: '',
+    item_amount: '',
+    item_info: '',
+    item_image: null,
+  });
+
+
+  useEffect(() => {
+    if (isEditMode && initialData) {
+      setFormData({
+        id: initialData.id ?? null,
+        item_name: initialData.item_name ?? '',
+        item_link: initialData.item_link ?? '',
+        item_contact: initialData.item_contact ?? '',
+        item_amount: initialData.item_amount ?? '',
+        item_info: initialData.item_info ?? '',
+        item_image: initialData.item_image ?? null,
+      });
+      setPreviewImage(initialData.item_image ?? null)
+    }
+  }, [initialData, isEditMode]);
+
+
+    const validate = () => {
     const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
-    if (!formData.amount.trim()) newErrors.amount = 'Amount is required';
-    if (!formData.reason.trim()) newErrors.reason = 'Reason is required';
+    if (!formData.item_name.trim()) newErrors.item_name = 'Name is required';
+    if (!formData.item_amount.trim()) newErrors.item_amount = 'Amount is required';
+    if (!formData.item_info.trim()) newErrors.item_info = 'Reason is required';
+    if (!previewImage && !pendingFileUpload) newErrors.item_image = 'Photo is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -58,59 +74,112 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
 
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-
-    if (file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64 = reader.result;
-        setFormData((prev) => ({
-          ...prev,
-          photo: base64,
-        }));
-      };
-      reader.readAsDataURL(file);
-    } else {
+    if (!file || !file.type.startsWith('image/')) {
       alert('Please upload a valid image.');
+      return;
     }
+
+    const previewURL = URL.createObjectURL(file);
+    setPreviewImage(previewURL);
+    setPendingFileUpload(file);
   };
+    const uploadImageToSupabase = async () => {
+      const file = pendingFileUpload;
+      if (!file) return null;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!validate()) return;
+      const fileExt = file.name.split('.').pop();
+      const filePath = `items/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-    const correctedLink = formData.link.trim();
-    const linkWithProtocol = correctedLink && !/^https?:\/\//i.test(correctedLink)
-      ? 'https://' + correctedLink
-      : correctedLink;
+      // ✅ Upload first
+      const { error: uploadError } = await supabase.storage
+        .from('item-images')
+        .upload(filePath, file);
 
-      const existing = JSON.parse(localStorage.getItem('wishlist') || '[]');
-
-      let newItem = { ...formData, link: linkWithProtocol };
-
-      // Ensure the item has a valid ID
-      if (!isEditMode) {
-        const nextId = existing.length ? Math.max(...existing.map(i => i.id || 0)) + 1 : 0;
-        newItem.id = nextId;
+      if (uploadError) {
+        console.error('Upload Error:', uploadError);
+        alert('Image upload failed');
+        return null;
       }
 
-      const updatedList = isEditMode
-        ? existing.map((item) => (item.id === newItem.id ? newItem : item))
-        : [...existing, newItem];
+      // ✅ Then get the public URL (for public bucket)
+      const { data, error: urlError } = supabase
+        .storage
+        .from('item-images')
+        .getPublicUrl(filePath);
 
-      setToastMessage(isEditMode ? 'Item updated successfully' : 'Item added successfully');
+      if (urlError) {
+        console.error('Public URL error:', urlError);
+        alert('Failed to get public URL');
+        return null;
+      }
+
+      if (!data?.publicUrl) {
+        console.warn('No public URL returned:', data);
+        alert('No public URL found');
+        return null;
+      }
+
+      return data.publicUrl;
+    };
 
 
-    localStorage.setItem('wishlist', JSON.stringify(updatedList));
-    setTimeout(() => {
-      setToastMessage('');
-      if (onSuccess) onSuccess();
-      if (!isEditMode) {
-      router.push('/profile');
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+    if (!selectedKin?.id || !selectedKin?.kindred_id) return alert('Kin info missing');
+
+
+    let imageUrl = formData.item_image;
+    if (pendingFileUpload) {
+      imageUrl = await uploadImageToSupabase();
+      if (!imageUrl) return;
     }
-    }, 800);
 
+    const correctedLink = formData.item_link.trim();
+    const linkWithProtocol =
+      correctedLink && !/^https?:\/\//i.test(correctedLink)
+        ? 'https://' + correctedLink
+        : correctedLink;
+
+    const payload = {
+      kin_id: selectedKin.id,
+      kindred_id: selectedKin.kindred_id,
+      type: 'want',
+      item_name: formData.item_name,
+      item_link: linkWithProtocol || null,
+      item_amount: formData.item_amount.replace(/,/g, ''),
+      item_info: formData.item_info,
+      item_image: imageUrl,
+      item_contact: formData.item_contact || null,
+    };
+
+    try {
+      if (isEditMode) {
+        const { error } = await supabase
+          .from('items')
+          .update(payload)
+          .eq('id', formData.id);
+
+        if (error) throw error;
+        setToastMessage('Item updated successfully');
+      } else {
+        const { error } = await supabase.from('items').insert(payload);
+        if (error) throw error;
+        setToastMessage('Item added successfully');
+      }
+
+      setTimeout(() => {
+        setToastMessage('');
+        if (onSuccess) onSuccess();
+        if (!isEditMode) router.push('/profile');
+      }, 800);
+    } catch (err) {
+      console.error('Supabase Error:', err);
+      alert('Something went wrong. Please try again.');
+    }
   };
+
+
 
   if (isEditMode) {
     return (
@@ -118,9 +187,9 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
         <SuccessToast message={toastMessage} onClose={() => setToastMessage('')} />
           <div className='grid grid-cols-[80px_1fr] gap-4'>
             <div className="relative w-full h-full rounded-md overflow-hidden  cursor-pointer">
-              {formData.photo ? (
+              {previewImage ? (
                 <img
-                  src={formData.photo}
+                  src={previewImage}
                   alt="Preview"
                   className="w-20 h-20 object-cover"
                 />
@@ -143,12 +212,12 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
               <div className="relative">
                 <input
                   type="text"
-                  name="name"
-                  value={formData.name}
+                  name="item_name"
+                  value={formData.item_name}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value.length <= 20) {
-                      setFormData((prev) => ({ ...prev, name: value }));
+                      setFormData((prev) => ({ ...prev, item_name: value }));
                     }
                   }}
                   placeholder="e.g Chiropractor appointment"
@@ -156,9 +225,9 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
                   required
                 />
                 <div className="absolute bottom-1 right-1 text-right text-[0.5rem] text-text-secondary">
-                  {formData.name.length} / 20
+                  {formData.item_name.length} / 20
                 </div>
-                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+                {errors.item_name && <p className="text-red-500 text-xs mt-1">{errors.item_name}</p>}
               </div>
             </div>
           </div>
@@ -166,8 +235,8 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
               <label className="text-sm text-text-secondary">Add a purchase link if any</label>
               <input
                 type="url"
-                name="link"
-                value={formData.link}
+                name="item_link"
+                value={formData.item_link}
                 onChange={handleChange}
                 placeholder="www.chiropractor.com/order"
                 className="w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text focus:outline-none focus:ring focus:ring-b-border h-[2.5rem]"
@@ -178,9 +247,9 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
             <div className="space-y-1">
               <label className="text-sm text-text-secondary">Contact</label>
               <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
+                type="text"
+                name="item_contact"
+                value={formData.item_contact}
                 onChange={handleChange}
                 placeholder="0800 000 0000"
                 className="w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text focus:outline-none focus:ring focus:ring-b-border h-[2.5rem]"
@@ -190,14 +259,18 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
               <label className="text-sm text-text-secondary">Amount (₦)</label>
               <input
                 type="text"
-                name="amount"
-                value={formData.amount}
-                onChange={handleChange}
-                placeholder="₦150,000"
+                name="item_amount"
+                value={formData.item_amount}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/[^0-9]/g, ''); // Remove non-digits
+                  const formatted = Number(raw).toLocaleString(); // Format with commas
+                  setFormData(prev => ({ ...prev, item_amount: formatted }));
+                }}
+                placeholder="150,000"
                 className="w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text focus:outline-none focus:ring focus:ring-b-border h-[2.5rem]"
                 required
               />
-              {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount}</p>}
+              {errors.item_amount && <p className="text-red-500 text-xs mt-1">{errors.item_amount}</p>}
             </div>
           </div>
 
@@ -205,12 +278,12 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
             <label className="text-sm text-text-secondary">Why is this item special to you?</label>
             <div className='relative'>
               <textarea
-                name="reason"
-                value={formData.reason}
+                name="item_info"
+                value={formData.item_info}
                 onChange={(e) => {
                   const value = e.target.value;
                   if (value.length <= 125) {
-                    setFormData((prev) => ({ ...prev, reason: value }));
+                    setFormData((prev) => ({ ...prev, item_info: value }));
                   }
                 }}
                 placeholder="I want to get back in shape..."
@@ -219,9 +292,9 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
                 required
               />
               <div className="absolute bottom-[10px] right-1 text-right text-[0.5rem] text-text-secondary">
-                {formData.reason.length} / 125
+                {formData.item_info.length} / 125
               </div>
-              {errors.reason && <p className="text-red-500 text-xs mt-1">{errors.reason}</p>}
+              {errors.item_info && <p className="text-red-500 text-xs mt-1">{errors.item_info}</p>}
             </div>
           </div>
 
@@ -244,12 +317,12 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
         <div className="relative">
           <input
             type="text"
-            name="name"
-            value={formData.name}
+            name="item_name"
+            value={formData.item_name}
             onChange={(e) => {
               const value = e.target.value;
               if (value.length <= 20) {
-                setFormData((prev) => ({ ...prev, name: value }));
+                setFormData((prev) => ({ ...prev, item_name: value }));
               }
             }}
             placeholder="e.g Chiropractor appointment"
@@ -257,9 +330,9 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
             required
           />
           <div className="absolute bottom-1 right-1 text-right text-[0.5rem] text-text-secondary">
-            {formData.name.length} / 20
+            {formData.item_name.length} / 20
           </div>
-          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+          {errors.item_name && <p className="text-red-500 text-xs mt-1">{errors.item_name}</p>}
         </div>
       </div>
 
@@ -272,10 +345,10 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
             className="hidden"
           />
           <div className='flex flex-row items-center justify-center gap-2'>
-            {formData.photo && (
+            {previewImage && (
               <div className="w-12 h-12">
                 <img
-                  src={formData.photo}
+                  src={previewImage}
                   alt="Uploaded preview"
                   className="rounded-md object-cover w-full h-full border"
                 />
@@ -293,8 +366,8 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
         <label className="text-sm text-text-secondary">Add a purchase link if any</label>
         <input
           type="url"
-          name="link"
-          value={formData.link}
+          name="item_link"
+          value={formData.item_link}
           onChange={handleChange}
           placeholder="www.chiropractor.com/order"
           className="w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text focus:outline-none focus:ring focus:ring-b-border h-[2.5rem]"
@@ -304,9 +377,9 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
       <div className="space-y-1">
         <label className="text-sm text-text-secondary">Add phone number if any</label>
         <input
-          type="tel"
-          name="phone"
-          value={formData.phone}
+          type="text"
+          name="item_contact"
+          value={formData.item_contact}
           onChange={handleChange}
           placeholder="0800 000 0000"
           className="w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text focus:outline-none focus:ring focus:ring-b-border h-[2.5rem]"
@@ -317,26 +390,30 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
         <label className="text-sm text-text-secondary">Amount (₦)</label>
         <input
           type="text"
-          name="amount"
-          value={formData.amount}
-          onChange={handleChange}
-          placeholder="₦150,000"
+          name="item_amount"
+          value={formData.item_amount}
+          onChange={(e) => {
+            const raw = e.target.value.replace(/[^0-9]/g, ''); // Remove non-digits
+            const formatted = Number(raw).toLocaleString(); // Format with commas
+            setFormData(prev => ({ ...prev, item_amount: formatted }));
+          }}
+          placeholder="150,000"
           className="w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text focus:outline-none focus:ring focus:ring-b-border h-[2.5rem]"
           required
         />
-        {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount}</p>}
+        {errors.item_amount && <p className="text-red-500 text-xs mt-1">{errors.item_amount}</p>}
       </div>
 
       <div className="space-y-1">
         <label className="text-sm text-text-secondary">Why is this item special to you?</label>
         <div className='relative'>
           <textarea
-            name="reason"
-            value={formData.reason}
+            name="item_info"
+            value={formData.item_info}
             onChange={(e) => {
               const value = e.target.value;
               if (value.length <= 125) {
-                setFormData((prev) => ({ ...prev, reason: value }));
+                setFormData((prev) => ({ ...prev, item_info: value }));
               }
             }}
             placeholder="I want to get back in shape..."
@@ -345,9 +422,9 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
             required
           />
           <div className="absolute bottom-[10px] right-1 text-right text-[0.5rem] text-text-secondary">
-            {formData.reason.length} / 125
+            {formData.item_info.length} / 125
           </div>
-          {errors.reason && <p className="text-red-500 text-xs mt-1">{errors.reason}</p>}
+          {errors.item_info && <p className="text-red-500 text-xs mt-1">{errors.item_info}</p>}
         </div>
       </div>
 

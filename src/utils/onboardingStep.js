@@ -1,4 +1,3 @@
-// utils/onboardingStep.js
 export const onboardingStep = (kin) => {
   if (kin.status === true) return 'done'
 

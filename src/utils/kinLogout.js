@@ -1,4 +1,3 @@
-// utils/logoutKin.js
 import { supabase } from '@/supabaseClient'
 
 export const kinLogout = async () => {

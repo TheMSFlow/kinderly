@@ -11,7 +11,8 @@ const variants = {
   secondary: 'bg-transparent border border-btn-secondary-border hover:bg-btn-secondary-hover text-btn-secondary-text',
   tertiary: 'bg-transparent border border-btn-tertiary-border hover:bg-btn-tertiary-hover text-btn-tertiary-text',
   warning: 'bg-transparent border border-btn-warning-border hover:bg-btn-warning-hover text-btn-warning-text',
-  ghost: 'bg-transparent text-btn-ghost hover:text-btn-ghost-hover underline',
+  underline: 'bg-transparent text-btn-ghost hover:text-btn-ghost-hover underline',
+  ghost: 'bg-transparent text-btn-ghost hover:text-btn-ghost-hover',
   wide: 'bg-btn-wide hover:bg-btn-wide-hover text-white w-full',
   event: 'bg-slate-800 text-white hover:bg-slate-900 gap-2',
 };

@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useEffect } from 'react'
 
 const SuccessToast = ({ message, duration = 3000, onClose }) => {

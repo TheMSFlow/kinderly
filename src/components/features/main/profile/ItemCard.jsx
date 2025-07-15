@@ -15,6 +15,7 @@ import Call from '@/components/icons/Call';
 import Product from '@/components/icons/Product';
 
 import { useItemView } from '@/context/useItemView';
+import { supabase } from '@/supabaseClient'
 
 const ItemCard = ({id, itemImage, itemTitle, itemAmount, itemReason, itemLink, itemContact, openItemId, setOpenItemId}) => {
     const pathname = usePathname()
@@ -56,13 +57,19 @@ const ItemCard = ({id, itemImage, itemTitle, itemAmount, itemReason, itemLink, i
   );
 }
 
-const handleDelete = () => {
-  const existing = JSON.parse(localStorage.getItem('wishlist') || '[]');
-  const updated = existing.filter(item => String(item.id) !== String(id));
-  localStorage.setItem('wishlist', JSON.stringify(updated));
+const handleDelete = async () => {
+  const { error } = await supabase
+    .from('items')
+    .delete()
+    .eq('id', id)
 
-  window.location.reload();
-};
+  if (error) {
+    console.error('Failed to delete item:', error)
+    return
+  }
+
+  window.location.reload()
+}
 
         
   return (

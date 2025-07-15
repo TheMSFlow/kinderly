@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import KinAvatar from '@/components/features/onboarding/KinAvatar'
-import AddNewKin from '@/components/features/main/profile/AddNewKin'
+import AddNewKin from '@/components/features/onboarding/AddNewKin'
 import ProfileModal from '@/components/features/onboarding/ProfileModal'
 import { getCompletedKin } from '@/utils/getCompletedKin'
 import { setSelectedKin } from '@/app/lib/kinCookies'

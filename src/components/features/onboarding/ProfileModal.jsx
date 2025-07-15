@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import Button from '@/components/common/Button'
-import { hashPin } from '@/app/lib/pinUtils'
+import { hashPin } from '@/utils/pinUtils'
 import { supabase } from '@/supabaseClient'
 
 const roles = [ 'Father', 'Mother', 'Guardian', 'Child', 'Aunty', 'Uncle', 'Nephew', 'Niece', 'Cousin', 'Care giver', 'Family friend', 'Grandfather', 'Grandmother' ]
