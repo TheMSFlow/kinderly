@@ -1,12 +1,13 @@
 "use client"
 
 import Button from '@/components/common/Button'
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import AuthForm from '@/components/features/auth/AuthForm'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/supabaseClient'
 
 const Login = () => {
+  const [formErrors, setFormErrors] = useState({})
   const router = useRouter()
 
 const handleSigninSubmit = async ({ email, password }) => {
@@ -18,7 +19,7 @@ const handleSigninSubmit = async ({ email, password }) => {
 
     if (error) {
       console.error('Login error:', error.message)
-      alert('Login failed: ' + error.message)
+      setFormErrors('Login failed: ' + error.message)
     } else {
       // ✅ Redirect immediately to protected route (e.g., /kindred)
       router.replace('/kindred')
@@ -33,7 +34,7 @@ const handleSigninSubmit = async ({ email, password }) => {
                 <div className='flex flex-col justify-center items-center gap-2'>
                     <h1 className='font-playfair text-[1.875rem] text-heading'>Sign In</h1>
                 </div>
-                <AuthForm onSubmit={handleSigninSubmit}/>
+                <AuthForm onSubmit={handleSigninSubmit} externalError={formErrors}/>
                 <div className='flex flex-row items-center justify-center'>
                     <p className='text-text-secondary text-sm mt-[2px] -mr-1'>Don't have an account?</p>
                     <Button 

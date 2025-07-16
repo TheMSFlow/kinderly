@@ -1,14 +1,20 @@
 'use client'
 
 import Button from '@/components/common/Button'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Mail from '@/components/icons/Mail'
 
-const AuthForm = ({ mode = 'login', onSubmit }) => {
+const AuthForm = ({ mode = 'login', onSubmit, externalError = {} }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (externalError) {
+      setErrors((prev) => ({ ...prev, ...externalError }))
+    }
+  }, [externalError])
 
   const isValidEmail = (email) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
@@ -46,7 +52,7 @@ const AuthForm = ({ mode = 'login', onSubmit }) => {
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
-      <div className="h-[5rem]">
+      <div className="h-[5.5rem]">
         <label htmlFor="email" className="text-sm text-text-secondary font-medium">
           Email
         </label>
@@ -55,7 +61,10 @@ const AuthForm = ({ mode = 'login', onSubmit }) => {
           type="email"
           placeholder="name@example.com"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value)
+            setErrors((prev) => ({ ...prev, email: '' }))
+          }}
           className={`w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text focus:outline-none focus:ring ${
             errors.email ? 'border-red-200 focus:ring-red-300' : 'border-b-border focus:ring-b-border'
           }`}

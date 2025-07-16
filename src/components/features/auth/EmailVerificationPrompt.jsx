@@ -3,7 +3,7 @@
 import React from 'react'
 import Button from '@/components/common/Button'
 
-const EmailVerificationPrompt = ({ show, onClose, onGoBack }) => {
+const EmailVerificationPrompt = ({ show, onClose, onRetry, content }) => {
   if (!show) return null
 
   return (
@@ -14,7 +14,7 @@ const EmailVerificationPrompt = ({ show, onClose, onGoBack }) => {
         </h2>
 
         <p className="text-sm text-text-primary mb-4 text-center">
-          We’ve sent a verification link to your email. Click the link to continue.
+          {content}
         </p>
 
         <div className="flex flex-col gap-2">
@@ -22,12 +22,12 @@ const EmailVerificationPrompt = ({ show, onClose, onGoBack }) => {
             Okay, got it!
           </Button>}
 
-          { onGoBack && <Button
-            variant="ghost"
-            onClick={onGoBack}
+          { onRetry && <Button
+            variant="secondary"
+            onClick={onRetry}
             className="text-sm text-center mt-4"
           >
-            Try again
+            Resend Verification Email
           </Button> }
         </div>
       </div>

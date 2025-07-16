@@ -66,29 +66,39 @@ const KindredForm = () => {
     setMembers(updated)
   }
 
-const validateForm = () => {
-  if (!kindredName.trim()) {
-    setToastMessage('Fill in your family name and at least 2 profiles to proceed')
-    return false
-  }
+  const validateForm = () => {
+    if (!kindredName.trim()) {
+      setToastMessage('Fill in your family name and at least 2 profiles to proceed')
+      return false
+    }
 
-  const validProfiles = members.filter((m) => m.name.trim() !== '')
+    const validProfiles = members.filter((m) => m.name.trim() !== '')
 
-  if (validProfiles.length < 2) {
-    setToastMessage('Fill in your family name and at least 2 profiles to proceed')
-    return false
-  }
+    if (validProfiles.length < 2) {
+      setToastMessage('Fill in your family name and at least 2 profiles to proceed')
+      return false
+    }
 
-  const profilesWithoutRole = validProfiles.filter((m) => !m.role.trim())
-  if (profilesWithoutRole.length > 0) {
-    setToastMessage(
-      `You didn't assign titles to your Kindred. Click the "Select title" and choose from the list`
+    const profilesWithoutRole = validProfiles.filter((m) => !m.role.trim())
+    if (profilesWithoutRole.length > 0) {
+      setToastMessage(
+        `You didn't assign titles to your Kindred. Click the "Select title" and choose from the list`
+      )
+      return false
+    }
+
+    const hasParentOrGuardian = validProfiles.some((m) =>
+      ['Father', 'Mother', 'Guardian'].includes(m.role)
     )
-    return false
+
+    if (!hasParentOrGuardian) {
+      setToastMessage('At least one parent or guardian must be part of your Kindred.')
+      return false
+    }
+
+    return true
   }
 
-  return true
-}
 
 
 const handleSubmit = async (e) => {

@@ -1,10 +1,11 @@
 import { supabase } from '@/supabaseClient'
+import { removeSelectedKin } from '@/app/lib/kinCookies'
 
 export const kinLogout = async () => {
   try {
     await supabase.auth.signOut()
 
-    document.cookie = 'selectedKin=; Max-Age=0; Path=/'
+    removeSelectedKin();
 
     window.location.href = '/login'
   } catch (error) {

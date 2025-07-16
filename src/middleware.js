@@ -59,9 +59,9 @@ export async function middleware(req) {
     return NextResponse.redirect(url)
   }
 
-  // ✅ Redirect `/onboarding/start` ➝ `/onboarding/profile` if name exists
+  // ✅ If kindred name exists, block access to /onboarding/start
   if (hasKindredName && pathname === '/onboarding/start') {
-    url.pathname = '/onboarding/profile'
+    url.pathname = '/kindred'
     return NextResponse.redirect(url)
   }
 

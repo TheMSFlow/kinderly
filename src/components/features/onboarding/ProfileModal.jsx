@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Button from '@/components/common/Button'
 import { hashPin } from '@/utils/pinUtils'
+import PinInput from '../auth/PinInput'
 import { supabase } from '@/supabaseClient'
 
 const roles = [ 'Father', 'Mother', 'Guardian', 'Child', 'Aunty', 'Uncle', 'Nephew', 'Niece', 'Cousin', 'Care giver', 'Family friend', 'Grandfather', 'Grandmother' ]
@@ -283,14 +284,9 @@ const ProfileModal = ({ data = {}, onClose, onComplete }) => {
           <div>
             <h2 className="text-xl font-playfair mb-2">Create your unique pin</h2>
             <p className="text-xs text-slate-50 mb-4">Enter a 4-digit PIN that you'll use to confirm important actions and access your profile if you are logged out.</p>
-            <input
-              type="password"
-              inputMode="numeric"
-              maxLength={4}
+            <PinInput
               value={member.pin}
-              onChange={(e) => handleChange('pin', e.target.value.replace(/\D/g, '').slice(0, 4))}
-              placeholder="Enter 4-digit PIN"
-              className="w-full px-3 py-2 border rounded-md text-sm bg-slate-200 text-slate-800"
+              onChange={(val) => handleChange('pin', val)}
             />
           </div>
         )}

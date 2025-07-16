@@ -12,7 +12,7 @@ export const setSelectedKin = (kin) => {
   document.cookie = `${COOKIE_NAME}=${encoded}; path=/; max-age=${MAX_AGE}; samesite=lax`
 
   // trigger sync across tabs + reactivity
-  localStorage.setItem('selectedKinUpdated', Date.now())
+  localStorage.setItem('kinListener', Date.now())
 }
 
 export const getSelectedKin = () => {
@@ -35,5 +35,10 @@ export const removeSelectedKin = () => {
   if (typeof window === 'undefined') return
 
   document.cookie = `${COOKIE_NAME}=; path=/; max-age=0; samesite=lax`
-  localStorage.setItem('selectedKinUpdated', Date.now())
+  localStorage.setItem('kinListener', Date.now())
+
+  // Cleanup the key entirely afterwards (optional but clean)
+  setTimeout(() => {
+    localStorage.removeItem('kinListener')
+  }, 100)
 }

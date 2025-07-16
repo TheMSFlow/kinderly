@@ -17,12 +17,14 @@ import Product from '@/components/icons/Product';
 import { useItemView } from '@/context/useItemView';
 import { supabase } from '@/supabaseClient'
 
+import { formatNaira } from '@/utils/currency';
+
 const ItemCard = ({id, itemImage, itemTitle, itemAmount, itemReason, itemLink, itemContact, openItemId, setOpenItemId}) => {
     const pathname = usePathname()
     const isProfile = pathname.includes('/profile')
     const isDashboard = pathname.includes('/dashboard') 
     const [isEditing, setIsEditing] = useState(false);
-    const [deleteItemModal, setDeletItemModal] = useState(false);
+    const [deleteItemModal, setDeleteItemModal] = useState(false);
 
     const { view } = useItemView()
     const isOpen  = openItemId === id
@@ -32,24 +34,32 @@ const ItemCard = ({id, itemImage, itemTitle, itemAmount, itemReason, itemLink, i
     const compact = view === 'compact'
     const visual = view === 'visual'
 
-    const handleSuccess = () => {
+    const handleSuccess = (updatedItem) => {
       setIsEditing(false);
-      window.location.reload();
-    }
+      // Optional: Toast here
+      setOpenItemId(null);
+
+      // Replace old item in UI (if you're lifting state up later)
+      if (typeof window !== 'undefined' && updatedItem) {
+        const event = new CustomEvent('item-updated', { detail: updatedItem });
+        window.dispatchEvent(event);
+      }
+    };
+
 
     if (isEditing) {
   return (
     <div className="w-full max-w-[35rem]">
       <ItemForm
         initialData={{
-          id,
-          name: itemTitle,
-          link: itemLink,
-          phone: itemContact,
-          amount: itemAmount,
-          reason: itemReason,
-          photo: itemImage
-        }}
+        id,
+        item_name: itemTitle,
+        item_link: itemLink,
+        item_contact: itemContact,
+        item_amount: itemAmount,
+        item_info: itemReason,
+        item_image: itemImage,
+      }}
         onCancel={() => setIsEditing(false)}
         onSuccess={handleSuccess}
       />
@@ -58,18 +68,18 @@ const ItemCard = ({id, itemImage, itemTitle, itemAmount, itemReason, itemLink, i
 }
 
 const handleDelete = async () => {
-  const { error } = await supabase
-    .from('items')
-    .delete()
-    .eq('id', id)
-
+  const { error } = await supabase.from('items').delete().eq('id', id);
   if (error) {
-    console.error('Failed to delete item:', error)
-    return
+    console.error('Failed to delete item:', error);
+    return;
   }
 
-  window.location.reload()
-}
+  if (typeof window !== 'undefined') {
+    const deleteEvent = new CustomEvent('item-deleted', { detail: { id } });
+    window.dispatchEvent(deleteEvent);
+  }
+};
+
 
         
   return (
@@ -84,7 +94,7 @@ const handleDelete = async () => {
           <Button
             variant="primary"
             className="w-full"
-            onClick={() => {setDeletItemModal(false)}}
+            onClick={() => {setDeleteItemModal(false)}}
           >
             Cancel
           </Button>
@@ -116,7 +126,7 @@ const handleDelete = async () => {
             <div className='flex flex-col gap-2 justify-center items-center h-full px-2 py-2'>
                 <div className='grid grid-cols-[1fr_auto] xs:grid-cols-[1fr_auto] gap-1 justify-between items-center w-full'>
                     <h2 className='font-playfair text-base xs:text-xl md:text-2xl break-keep -mt-1 lg:mt-0 leading-tight xs:leading-tight'>{itemTitle}</h2>
-                    <div className='bg-slate-800 p-2 text-xs xs:text-sm md:text-base leading-none text-slate-50 rounded-lg text-center'>{`₦ ${itemAmount}`}</div>
+                    <div className='bg-slate-800 p-2 text-xs xs:text-sm md:text-base leading-none text-slate-50 rounded-lg text-center'>{formatNaira(itemAmount)}</div>
                 </div>
                 <p className='text-xs xs:text-base w-full break-all xs:break-keep '>{itemReason}</p>
             </div>
@@ -124,7 +134,7 @@ const handleDelete = async () => {
             {isProfile && (
             <div className='absolute -bottom-10 right-0 w-3/4 xs:w-1/2 h-10 grid grid-cols-[1fr_1fr] p-1 gap-2'>
               <Button iconLeft={Edit} onClick={() => setIsEditing(true)}>Edit</Button>
-              <Button onClick={() => {setDeletItemModal(true)}} className={'gap-1'} iconLeft={Delete} variant='warning'>Delete</Button>
+              <Button onClick={() => {setDeleteItemModal(true)}} className={'gap-1'} iconLeft={Delete} variant='warning'>Delete</Button>
             </div>
             )}
             {/* When in '/dashboard' page */}
@@ -156,7 +166,7 @@ const handleDelete = async () => {
                     <div className="flex flex-col gap-2 mr-2 py-2 xs:py-4">
                       <h2 className="font-playfair text-lg break-keep leading-tight">{itemTitle}</h2>
                       <div className="w-fit bg-slate-800 py-2 px-4 text-xs xs:text-sm text-slate-50 rounded-lg">
-                        ₦ {itemAmount}
+                        {formatNaira(itemAmount)}
                       </div>
                     </div>
                   </div>
@@ -165,8 +175,8 @@ const handleDelete = async () => {
                     {itemImage ? (
                       <Image src={itemImage} alt={itemTitle} fill className="object-cover" />
                     ) : <ItemImageDefault />}
-                    <div className="absolute top-0 right-0 bg-slate-900/85 p-4 text-xl text-slate-50">
-                      ₦ {itemAmount}
+                    <div className="absolute top-0 right-0 bg-slate-900/85 p-4 text-xs text-slate-50">
+                      {formatNaira(itemAmount)}
                     </div>
                   </div>
                 )
@@ -182,7 +192,7 @@ const handleDelete = async () => {
                     <div className="grid grid-cols-[1fr_auto] gap-1 items-center w-full">
                       <h2 className="font-playfair text-base xs:text-xl md:text-2xl">{itemTitle}</h2>
                       <div className="bg-slate-800 p-2 text-xs xs:text-sm md:text-base text-slate-50 rounded-lg">
-                        ₦ {itemAmount}
+                        {formatNaira(itemAmount)}
                       </div>
                     </div>
                     <p className="text-xs xs:text-base w-full break-words">{itemReason}</p>
@@ -203,7 +213,7 @@ const handleDelete = async () => {
                       iconLeft={Delete} variant="warning" 
                       onClick={(e) => {
                         e.stopPropagation()
-                        setDeletItemModal(true)}
+                        setDeleteItemModal(true)}
                         }>
                         Delete
                       </Button>

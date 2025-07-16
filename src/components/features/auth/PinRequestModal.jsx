@@ -44,7 +44,7 @@ const PinRequestModal = ({ memberName, onSubmit, onClose, error }) => {
                     key={idx}
                     id={`pin-${idx}`}
                     className="w-14 h-14 md:w-20 md:h-20 text-xl text-text-primary text-center border border-b-border rounded-md bg-input-bg placeholder-placeholder-text focus:outline-none focus:ring focus:ring-b-border"
-                    type="text"
+                    type="password"
                     inputMode="numeric"
                     maxLength={1}
                     value={d}

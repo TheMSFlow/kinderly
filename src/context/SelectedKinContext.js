@@ -42,7 +42,7 @@ export const SelectedKinProvider = ({ children }) => {
   // Listen to cookie changes via storage events (triggered by set/removeSelectedKin)
   useEffect(() => {
     const handleStorageChange = (e) => {
-      if (e.key === 'selectedKinUpdated') {
+      if (e.key === 'kinListener') {
         fetchKinFromSupabase()
       }
     }

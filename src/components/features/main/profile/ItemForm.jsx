@@ -16,6 +16,8 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
   const [toastMessage, setToastMessage] = useState('');
   const [previewImage, setPreviewImage] = useState(null)
   const [pendingFileUpload, setPendingFileUpload] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
 
   const { kin: selectedKin, loading } = useSelectedKin();
 
@@ -45,7 +47,7 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
         item_name: initialData.item_name ?? '',
         item_link: initialData.item_link ?? '',
         item_contact: initialData.item_contact ?? '',
-        item_amount: initialData.item_amount ?? '',
+        item_amount: initialData.item_amount?.toString() ?? '',
         item_info: initialData.item_info ?? '',
         item_image: initialData.item_image ?? null,
       });
@@ -53,13 +55,19 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
     }
   }, [initialData, isEditMode]);
 
-
+    const MAX_AMOUNT = 9999999999.99;
     const validate = () => {
     const newErrors = {};
+
+    const rawAmount = formData.item_amount.replace(/,/g, '');
+    const numericAmount = parseFloat(rawAmount);
+
     if (!formData.item_name.trim()) newErrors.item_name = 'Name is required';
-    if (!formData.item_amount.trim()) newErrors.item_amount = 'Amount is required';
+    if (!rawAmount || isNaN(numericAmount)) newErrors.item_amount = 'Amount is required';
+    else if (numericAmount > MAX_AMOUNT) newErrors.item_amount = 'Amount exceeds ₦9,999,999,999.99';
     if (!formData.item_info.trim()) newErrors.item_info = 'Reason is required';
     if (!previewImage && !pendingFileUpload) newErrors.item_image = 'Photo is required';
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -83,17 +91,60 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
     setPreviewImage(previewURL);
     setPendingFileUpload(file);
   };
-    const uploadImageToSupabase = async () => {
+    
+
+      useEffect(() => {
+      return () => {
+        if (previewImage?.startsWith('blob:')) {
+          URL.revokeObjectURL(previewImage);
+        }
+      };
+    }, [previewImage]);
+
+    const uploadImageToSupabase = async (existingUrl = null) => {
       const file = pendingFileUpload;
       if (!file) return null;
 
-      const fileExt = file.name.split('.').pop();
-      const filePath = `items/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const kindredId = selectedKin?.kindred_id;
+      const kinId = selectedKin?.id;
 
-      // ✅ Upload first
+      if (!kindredId || !kinId) {
+        alert('Missing kindred or kin info');
+        return null;
+      }
+
+      // ✅ Pre-flight validation: Ensure metadata will include kin_id
+      const metadata = { kin_id: kinId };
+      if (!metadata.kin_id) {
+        alert('Missing kin_id in metadata');
+        return null;
+      }
+
+      let filePath;
+
+      if (existingUrl) {
+        const segments = existingUrl.split('/');
+        const idx = segments.findIndex(s => s === 'item-images');
+        filePath = segments.slice(idx + 1).join('/');
+      } else {
+        const mimeMap = {
+          'image/jpeg': 'jpg',
+          'image/png': 'png',
+          'image/webp': 'webp',
+        };
+        const fileExt = mimeMap[file.type] || 'jpg';
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        filePath = `${kindredId}/${kinId}/${fileName}`;
+      }
+
       const { error: uploadError } = await supabase.storage
         .from('item-images')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          upsert: true,
+          contentType: file.type,
+          cacheControl: '3600',
+          metadata, // ✅ Explicit and verified
+        });
 
       if (uploadError) {
         console.error('Upload Error:', uploadError);
@@ -101,21 +152,14 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
         return null;
       }
 
-      // ✅ Then get the public URL (for public bucket)
       const { data, error: urlError } = supabase
         .storage
         .from('item-images')
         .getPublicUrl(filePath);
 
-      if (urlError) {
+      if (urlError || !data?.publicUrl) {
         console.error('Public URL error:', urlError);
-        alert('Failed to get public URL');
-        return null;
-      }
-
-      if (!data?.publicUrl) {
-        console.warn('No public URL returned:', data);
-        alert('No public URL found');
+        alert('Failed to get image URL');
         return null;
       }
 
@@ -123,61 +167,145 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
     };
 
 
+
+
+
     const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-    if (!selectedKin?.id || !selectedKin?.kindred_id) return alert('Kin info missing');
+      e.preventDefault();
+      if (submitting) return;
+      if (!validate()) return;
+      if (!selectedKin?.id || !selectedKin?.kindred_id) return alert('Kin info missing');
 
+      setSubmitting(true);
 
-    let imageUrl = formData.item_image;
-    if (pendingFileUpload) {
-      imageUrl = await uploadImageToSupabase();
-      if (!imageUrl) return;
-    }
+      let imageUrl = formData.item_image;
 
-    const correctedLink = formData.item_link.trim();
-    const linkWithProtocol =
-      correctedLink && !/^https?:\/\//i.test(correctedLink)
-        ? 'https://' + correctedLink
-        : correctedLink;
-
-    const payload = {
-      kin_id: selectedKin.id,
-      kindred_id: selectedKin.kindred_id,
-      type: 'want',
-      item_name: formData.item_name,
-      item_link: linkWithProtocol || null,
-      item_amount: formData.item_amount.replace(/,/g, ''),
-      item_info: formData.item_info,
-      item_image: imageUrl,
-      item_contact: formData.item_contact || null,
-    };
-
-    try {
-      if (isEditMode) {
-        const { error } = await supabase
-          .from('items')
-          .update(payload)
-          .eq('id', formData.id);
-
-        if (error) throw error;
-        setToastMessage('Item updated successfully');
-      } else {
-        const { error } = await supabase.from('items').insert(payload);
-        if (error) throw error;
-        setToastMessage('Item added successfully');
+      if (pendingFileUpload) {
+        imageUrl = await uploadImageToSupabase(isEditMode ? initialData?.item_image : null);
+        if (!imageUrl) {
+          setSubmitting(false);
+          return;
+        }
       }
 
-      setTimeout(() => {
-        setToastMessage('');
-        if (onSuccess) onSuccess();
-        if (!isEditMode) router.push('/profile');
-      }, 800);
-    } catch (err) {
-      console.error('Supabase Error:', err);
-      alert('Something went wrong. Please try again.');
-    }
-  };
+
+
+      // 🌐 Fix link
+      const correctedLink = formData.item_link.trim();
+      const linkWithProtocol =
+        correctedLink && !/^https?:\/\//i.test(correctedLink)
+          ? 'https://' + correctedLink
+          : correctedLink;
+
+      if (isEditMode) {
+        const clean = (val) => (val || '').toString().replace(/,/g, '').trim();
+
+        // Only include changed fields
+        const payload = {};
+        Object.entries(formData).forEach(([key, value]) => {
+          const original = clean(initialData?.[key]);
+          const current = clean(value);
+          if (original !== current) {
+            payload[key] = value;
+          }
+        });
+
+        // Always required
+        payload.kin_id = selectedKin.id;
+        payload.kindred_id = selectedKin.kindred_id;
+        payload.type = 'want';
+
+        // Link
+        if (payload.item_link) {
+          payload.item_link = linkWithProtocol;
+        }
+
+        // Format amount if present
+        if (payload.item_amount) {
+          payload.item_amount = payload.item_amount.replace(/,/g, '');
+        }
+
+        // Update image only if changed
+        if (imageUrl && imageUrl !== initialData?.item_image) {
+          payload.item_image = imageUrl;
+        }
+
+        // Skip if no changes
+        if (Object.keys(payload).length <= 3) {
+          alert('No changes to update.');
+          if (onCancel) onCancel();
+          setSubmitting(false);
+          return;
+        }
+
+        try {
+          const { error } = await supabase
+            .from('items')
+            .update(payload)
+            .eq('id', formData.id);
+
+          if (error) throw error;
+
+          setToastMessage('Item updated successfully');
+
+          // 🚀 Notify of update
+          if (typeof window !== 'undefined') {
+            const updatedItem = { ...formData, item_image: imageUrl };
+            const updateEvent = new CustomEvent('item-updated', { detail: updatedItem });
+            window.dispatchEvent(updateEvent);
+          }
+
+          setTimeout(() => {
+            setToastMessage('');
+            if (onSuccess) onSuccess();
+          }, 800);
+        } catch (err) {
+          console.error('Supabase Update Error:', err);
+          alert('Something went wrong. Please try again.');
+        } finally {
+          setSubmitting(false);
+        }
+
+        return;
+      }
+
+      // ✅ Add new item flow
+      const payload = {
+        kin_id: selectedKin.id,
+        kindred_id: selectedKin.kindred_id,
+        type: 'want',
+        item_name: formData.item_name.trim(),
+        item_link: linkWithProtocol || null,
+        item_amount: formData.item_amount.replace(/,/g, ''),
+        item_info: formData.item_info.trim(),
+        item_image: imageUrl,
+        item_contact: formData.item_contact || null,
+      };
+
+      try {
+        const { error, data } = await supabase.from('items').insert(payload);
+        if (error) throw error;
+
+        setToastMessage('Item added successfully');
+
+        if (typeof window !== 'undefined') {
+          const addedItem = { ...formData, item_image: imageUrl };
+          const addEvent = new CustomEvent('item-added', { detail: addedItem });
+          window.dispatchEvent(addEvent);
+        }
+
+        setTimeout(() => {
+          setToastMessage('');
+          if (onSuccess) onSuccess();
+          router.push('/profile');
+        }, 800);
+      } catch (err) {
+        console.error('Supabase Insert Error:', err);
+        alert('Something went wrong. Please try again.');
+      } finally {
+        setSubmitting(false); 
+      }
+    };
 
 
 
@@ -262,10 +390,12 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
                 name="item_amount"
                 value={formData.item_amount}
                 onChange={(e) => {
-                  const raw = e.target.value.replace(/[^0-9]/g, ''); // Remove non-digits
-                  const formatted = Number(raw).toLocaleString(); // Format with commas
+                  const raw = e.target.value.replace(/[^0-9]/g, '');
+                  const limited = raw.slice(0, 10); // only allow 10 digits before decimal
+                  const formatted = Number(limited).toLocaleString();
                   setFormData(prev => ({ ...prev, item_amount: formatted }));
                 }}
+
                 placeholder="150,000"
                 className="w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text focus:outline-none focus:ring focus:ring-b-border h-[2.5rem]"
                 required
@@ -299,7 +429,9 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
           </div>
 
         <div className="flex gap-2">
-          <Button type="submit" variant="primary" className="w-full">Update</Button>
+          <Button type="submit" variant="primary" className="w-full" disabled={submitting}>
+            {submitting ? 'Updating item...' : 'Update'}
+          </Button>
           <Button type="button" variant="secondary" className="w-full" onClick={onCancel}>Cancel</Button>
         </div>
       </form>
@@ -393,8 +525,9 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
           name="item_amount"
           value={formData.item_amount}
           onChange={(e) => {
-            const raw = e.target.value.replace(/[^0-9]/g, ''); // Remove non-digits
-            const formatted = Number(raw).toLocaleString(); // Format with commas
+            const raw = e.target.value.replace(/[^0-9]/g, '');
+            const limited = raw.slice(0, 10); // only allow 10 digits before decimal
+            const formatted = Number(limited).toLocaleString();
             setFormData(prev => ({ ...prev, item_amount: formatted }));
           }}
           placeholder="150,000"
@@ -429,8 +562,8 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
       </div>
 
       <div className="flex items-center gap-4">
-        <Button type="submit" variant="primary" className="w-full mt-4">
-          Add item
+        <Button type="submit" variant="primary" className="w-full mt-4" disabled={submitting}>
+          {submitting ? 'Adding item...' : 'Add item'}
         </Button>
       </div>
     </form>

@@ -144,22 +144,24 @@ const AuthCallback = () => {
 
   const toggleVisibility = () => setShowPassword((prev) => !prev)
 
-
-  const handleGoBack = () => {
-  router.replace('/signup')
+  const handleRetry = () => {
+  router.replace('/signup?resend=true')
 }
+
 
 
   return (
     <>
     <div className="flex justify-center items-center min-h-screen bg-bg-primary text-text-primary">
       <EmailVerificationPrompt
+        content={`Looks like you've already signed up but haven't confirmed your email.
+Please check your inbox or spam folder. Didn't get the email?`}
         show={showVerifyModal}
-        onGoBack={handleGoBack}
+        onRetry={handleRetry}
       />
 
       {status === 'loading' && (
-        <p className="text-lg">Loading...</p>
+        <p className="text-lg">Waiting for email confirmation...</p>
       )}
 
       {status === 'prompt-password' && (

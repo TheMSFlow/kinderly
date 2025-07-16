@@ -14,33 +14,59 @@ const ProfileMain = () => {
   const [loading, setLoading] = useState(true);
   const [openItemId, setOpenItemId] = useState(null);
 
+  const fetchItems = async () => {
+    if (!selectedKin?.id) return;
+
+    setLoading(true);
+
+    const { data, error } = await supabase
+      .from('items')
+      .select('*')
+      .eq('kin_id', selectedKin.id)
+      .eq('type', 'want')
+      .order('created_at', { ascending: false });
+
+    if (!data?.find((item) => item.id === openItemId)) {
+      setOpenItemId(null);
+    }
+
+    if (error) {
+      console.error('Error fetching items:', error.message);
+      setItems([]);
+    } else {
+      setItems(data || []);
+    }
+
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchItems = async () => {
-      if (!selectedKin?.id) return;
-
-      setLoading(true);
-
-      const { data, error } = await supabase
-        .from('items')
-        .select('*')
-        .eq('kin_id', selectedKin.id)
-        .eq('type', 'want')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching items:', error.message);
-        setItems([]);
-      } else {
-        setItems(data || []);
-      }
-
-      setLoading(false);
-    };
-
     if (!kinLoading && selectedKin?.id) {
       fetchItems();
     }
   }, [selectedKin, kinLoading]);
+
+
+  useEffect(() => {
+  const handleUpdate = () => {
+    if (selectedKin?.id) {
+      fetchItems();
+    }
+  };
+
+  window.addEventListener('item-added', handleUpdate);
+  window.addEventListener('item-updated', handleUpdate);
+  window.addEventListener('item-deleted', handleUpdate);
+
+  return () => {
+    window.removeEventListener('item-added', handleUpdate);
+    window.removeEventListener('item-updated', handleUpdate);
+    window.removeEventListener('item-deleted', handleUpdate);
+  };
+}, [selectedKin?.id]); 
+
+
+
 
   return (
     <ContentWrapMain>

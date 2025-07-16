@@ -37,6 +37,7 @@ const KinAvatar = ({profile, showImage = false, onClick}) => {
 
   return (
     <button
+      type="button"
       onClick={onClick}
       className={`${baseStyles} ${className} rounded-lg grid place-items-center`}
     >
