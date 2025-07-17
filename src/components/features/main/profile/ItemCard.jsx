@@ -49,7 +49,7 @@ const ItemCard = ({id, itemImage, itemTitle, itemAmount, itemReason, itemLink, i
 
     if (isEditing) {
   return (
-    <div className="w-full max-w-[35rem]">
+    <div className="w-[90vw] md:w-[80vw] lg:w-[35rem] xl:w-[40rem] mb-12">
       <ItemForm
         initialData={{
         id,
@@ -108,43 +108,46 @@ const handleDelete = async () => {
         </div>
       </div>
     </div>)} 
+    
     {/* Detailed card */}
-        { detailed &&
-        <div className='relative grid grid-cols-[100px_1fr] lg:grid-cols-[128px_1fr] gap-0 justify-center items-start w-full lg:w-[35rem] h-[10rem] lg:h-[9rem] bg-gradient-to-b from-slate-300 to-slate-400  rounded-tl-lg rounded-tr-lg rounded-bl-lg  text-slate-800 '>
-            {itemImage ? (
-              <div className="relative w-full h-full rounded-tl-lg rounded-bl-lg overflow-hidden">
-                <Image 
-                  src={itemImage}
-                  alt={itemTitle}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            ) : (
-              <ItemImageDefault />
-            )}
-            <div className='flex flex-col gap-2 justify-center items-center h-full px-2 py-2'>
-                <div className='grid grid-cols-[1fr_auto] xs:grid-cols-[1fr_auto] gap-1 justify-between items-center w-full'>
-                    <h2 className='font-playfair text-base xs:text-xl md:text-2xl break-keep -mt-1 lg:mt-0 leading-tight xs:leading-tight'>{itemTitle}</h2>
-                    <div className='bg-slate-800 p-2 text-xs xs:text-sm md:text-base leading-none text-slate-50 rounded-lg text-center'>{formatNaira(itemAmount)}</div>
+          { detailed &&
+          <div className='relative grid grid-cols-[100px_1fr] md:grid-cols-[128px_1fr] gap-0 justify-center items-start w-[90vw] md:w-[80vw] lg:w-[35rem] xl:w-[40rem] h-fit bg-gradient-to-b from-slate-300 to-slate-400  rounded-tl-lg rounded-tr-lg rounded-bl-lg  text-slate-800 mb-20'>
+              {itemImage ? (
+                <div className="relative w-full h-full rounded-tl-lg rounded-bl-lg overflow-hidden">
+                  <Image 
+                    src={itemImage}
+                    alt={itemTitle}
+                    priority
+                    fill 
+                    sizes="150px"
+                    className="object-cover"
+                  />
                 </div>
-                <p className='text-xs xs:text-base w-full break-all xs:break-keep '>{itemReason}</p>
-            </div>
-            {/* When in '/profile' page */}
-            {isProfile && (
-            <div className='absolute -bottom-10 right-0 w-3/4 xs:w-1/2 h-10 grid grid-cols-[1fr_1fr] p-1 gap-2'>
-              <Button iconLeft={Edit} onClick={() => setIsEditing(true)}>Edit</Button>
-              <Button onClick={() => {setDeleteItemModal(true)}} className={'gap-1'} iconLeft={Delete} variant='warning'>Delete</Button>
-            </div>
-            )}
-            {/* When in '/dashboard' page */}
-            {isDashboard && (
-            <div className='absolute -bottom-10 right-0 w-3/4 h-10 grid grid-cols-[1fr_1fr] py-2 pl-2 gap-2'>
-              {itemLink ? <Button iconLeft={Product}>Product link</Button> : <div className='grid place-items-center w-full h-full py-2 px-4 bg-btn-primary rounded-[6px] text-btn-primary-text opacity-30'>No link</div>}
-              {itemContact ? <Button className={'gap-1'} iconLeft={Call} variant='warning'>No Contact</Button> : <div className='grid place-items-center w-full h-full py-2 px-4 bg-btn-primary rounded-[6px] text-btn-primary-text opacity-30'>No contact</div>}
-            </div>
-            )}
-        </div>}
+              ) : (
+                <ItemImageDefault />
+              )}
+              <div className='flex flex-col gap-2 justify-center items-center h-[8.5rem] xs:h-[7rem] sm:h-[9rem] px-2 py-2'>
+                  <div className='grid grid-cols-[1fr_auto] xs:grid-cols-[1fr_auto] gap-1 justify-between items-center w-full'>
+                      <h2 className='font-playfair text-base xs:text-xl md:text-2xl break-keep -mt-1 lg:mt-0 leading-tight xs:leading-tight'>{itemTitle}</h2>
+                      <div className='bg-slate-800 p-2 text-xs xs:text-sm md:text-base leading-none text-slate-50 rounded-lg text-center'>{formatNaira(itemAmount)}</div>
+                  </div>
+                  <p className='text-xs sm:text-base w-full h-[5rem] xs:h-[3.5rem] break-all xs:break-keep'>{itemReason}</p>
+              </div>
+              {/* When in '/profile' page */}
+              {isProfile && (
+              <div className='absolute -bottom-10 right-0 w-3/4 xs:w-1/2 h-10 grid grid-cols-[1fr_1fr] p-1 gap-2'>
+                <Button iconLeft={Edit} onClick={() => setIsEditing(true)}>Edit</Button>
+                <Button onClick={() => {setDeleteItemModal(true)}} className={'gap-1'} iconLeft={Delete} variant='warning'>Delete</Button>
+              </div>
+              )}
+              {/* When in '/dashboard' page */}
+              {isDashboard && (
+              <div className='absolute -bottom-10 right-0 w-3/4 h-10 grid grid-cols-[1fr_1fr] py-2 pl-2 gap-2'>
+                {itemLink ? <Button iconLeft={Product}>Product link</Button> : <div className='grid place-items-center w-full h-full py-2 px-4 bg-btn-primary rounded-[6px] text-btn-primary-text opacity-30'>No link</div>}
+                {itemContact ? <Button className={'gap-1'} iconLeft={Call} variant='warning'>No Contact</Button> : <div className='grid place-items-center w-full h-full py-2 px-4 bg-btn-primary rounded-[6px] text-btn-primary-text opacity-30'>No contact</div>}
+              </div>
+              )}
+          </div>}
 
       {(compact || visual) && 
             <div
@@ -157,10 +160,10 @@ const handleDelete = async () => {
               {!isOpen ? (
                 // === Collapsed Compact/Visual View ===
                 compact ? (
-                  <div className="grid grid-cols-[100px_1fr] xs:grid-cols-[128px_1fr] gap-2 w-full md:w-1/2 lg:w-[18rem] bg-gradient-to-b from-slate-300 to-slate-400 rounded-lg text-slate-800 overflow-hidden">
+                  <div className="grid grid-cols-[100px_1fr] xs:grid-cols-[128px_1fr] gap-2 w-[90vw] md:w-[60vw] lg:w-[18rem] xl:w-[40vw] bg-gradient-to-b from-slate-300 to-slate-400 rounded-lg text-slate-800 overflow-hidden">
                     <div className="relative w-full h-full">
                       {itemImage ? (
-                        <Image src={itemImage} alt={itemTitle} fill className="object-cover" />
+                        <Image src={itemImage} alt={itemTitle} priority fill sizes="150px" className="object-cover" />
                       ) : <ItemImageDefault />}
                     </div>
                     <div className="flex flex-col gap-2 mr-2 py-2 xs:py-4">
@@ -173,7 +176,7 @@ const handleDelete = async () => {
                 ) : (
                   <div className="relative h-[9.375rem] w-[9.375rem] overflow-hidden rounded-lg">
                     {itemImage ? (
-                      <Image src={itemImage} alt={itemTitle} fill className="object-cover" />
+                      <Image src={itemImage} alt={itemTitle} priority fill sizes="150px" className="object-cover" />
                     ) : <ItemImageDefault />}
                     <div className="absolute top-0 right-0 bg-slate-900/85 p-4 text-xs text-slate-50">
                       {formatNaira(itemAmount)}
@@ -182,13 +185,22 @@ const handleDelete = async () => {
                 )
               ) : (
                 // === Expanded Detailed View (Inline) ===
-                <div className="relative grid grid-cols-[100px_1fr] lg:grid-cols-[128px_1fr] gap-0 w-full lg:w-[35rem] h-[10rem] bg-gradient-to-b from-slate-300 to-slate-400 rounded-lg text-slate-800">
+                <div className="relative grid grid-cols-[100px_1fr] md:grid-cols-[128px_1fr] gap-0 justify-center items-start w-[90vw] md:w-[80vw] lg:w-[35rem] xl:w-[40rem] h-fit  bg-gradient-to-b from-slate-300 to-slate-400 rounded-lg text-slate-800 mb-20 mt-6">
                   <div className="relative w-full h-full rounded-l-lg overflow-hidden">
                     {itemImage ? (
-                      <Image src={itemImage} alt={itemTitle} fill className="object-cover" />
-                    ) : <ItemImageDefault />}
+                      <Image 
+                      src={itemImage} 
+                      alt={itemTitle} 
+                      priority 
+                      fill 
+                      sizes="150px" 
+                      className="object-cover" 
+                      />
+                    ) : (
+                      <ItemImageDefault />
+                    )}
                   </div>
-                  <div className="flex flex-col gap-2 justify-center h-full px-2 py-2">
+                  <div className="flex flex-col gap-2 justify-center h-[8.5rem] xs:h-[7rem] sm:h-[9rem] px-2 py-2">
                     <div className="grid grid-cols-[1fr_auto] gap-1 items-center w-full">
                       <h2 className="font-playfair text-base xs:text-xl md:text-2xl">{itemTitle}</h2>
                       <div className="bg-slate-800 p-2 text-xs xs:text-sm md:text-base text-slate-50 rounded-lg">

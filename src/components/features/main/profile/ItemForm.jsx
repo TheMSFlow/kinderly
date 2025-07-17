@@ -311,130 +311,130 @@ const ItemForm = ({ initialData = null, onCancel, onSuccess}) => {
 
   if (isEditMode) {
     return (
-      <form onSubmit={handleSubmit} noValidate className="space-y-4 bg-bg-form-modal p-4 rounded-md w-full max-w-xl">
-        <SuccessToast message={toastMessage} onClose={() => setToastMessage('')} />
-          <div className='grid grid-cols-[80px_1fr] gap-4'>
-            <div className="relative w-full h-full rounded-md overflow-hidden  cursor-pointer">
-              {previewImage ? (
-                <img
-                  src={previewImage}
-                  alt="Preview"
-                  className="w-20 h-20 object-cover"
+        <form onSubmit={handleSubmit} noValidate className="space-y-4 bg-bg-form-modal p-4 rounded-md w-full">
+          <SuccessToast message={toastMessage} onClose={() => setToastMessage('')} />
+            <div className='grid grid-cols-[80px_1fr] gap-4'>
+              <div className="relative w-full h-full rounded-md overflow-hidden  cursor-pointer">
+                {previewImage ? (
+                  <img
+                    src={previewImage}
+                    alt="Preview"
+                    className="w-20 h-20 object-cover"
+                  />
+                ) : (
+                  <div className="w-20 h-20 bg-slate-300 rounded-md grid place-content-center text-xs text-slate-600 p-4 text-center">
+                    Choose image
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
                 />
-              ) : (
-                <div className="w-20 h-20 bg-slate-300 rounded-md grid place-content-center text-xs text-slate-600 p-4 text-center">
-                  Choose image
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm text-text-secondary">
+                  Product name
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="item_name"
+                    value={formData.item_name}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value.length <= 20) {
+                        setFormData((prev) => ({ ...prev, item_name: value }));
+                      }
+                    }}
+                    placeholder="e.g Chiropractor appointment"
+                    className="w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text focus:outline-none focus:ring focus:ring-b-border h-[2.5rem] text-text-secondary"
+                    required
+                  />
+                  <div className="absolute bottom-1 right-1 text-right text-[0.5rem] text-text-secondary">
+                    {formData.item_name.length} / 20
+                  </div>
+                  {errors.item_name && <p className="text-red-500 text-xs mt-1">{errors.item_name}</p>}
                 </div>
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoUpload}
-                className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
-              />
+              </div>
             </div>
             <div className="space-y-1">
-              <label className="text-sm text-text-secondary">
-                Product name
-              </label>
-              <div className="relative">
+                <label className="text-sm text-text-secondary">Add a purchase link if any</label>
+                <input
+                  type="url"
+                  name="item_link"
+                  value={formData.item_link}
+                  onChange={handleChange}
+                  placeholder="www.chiropractor.com/order"
+                  className="w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text focus:outline-none focus:ring focus:ring-b-border h-[2.5rem]"
+                />
+              </div>
+            <div className="flex flex-row gap-4">
+              
+              <div className="space-y-1">
+                <label className="text-sm text-text-secondary">Contact</label>
                 <input
                   type="text"
-                  name="item_name"
-                  value={formData.item_name}
+                  name="item_contact"
+                  value={formData.item_contact}
+                  onChange={handleChange}
+                  placeholder="0800 000 0000"
+                  className="w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text focus:outline-none focus:ring focus:ring-b-border h-[2.5rem]"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm text-text-secondary">Amount (₦)</label>
+                <input
+                  type="text"
+                  name="item_amount"
+                  value={formData.item_amount}
                   onChange={(e) => {
-                    const value = e.target.value;
-                    if (value.length <= 20) {
-                      setFormData((prev) => ({ ...prev, item_name: value }));
-                    }
+                    const raw = e.target.value.replace(/[^0-9]/g, '');
+                    const limited = raw.slice(0, 10); // only allow 10 digits before decimal
+                    const formatted = Number(limited).toLocaleString();
+                    setFormData(prev => ({ ...prev, item_amount: formatted }));
                   }}
-                  placeholder="e.g Chiropractor appointment"
-                  className="w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text focus:outline-none focus:ring focus:ring-b-border h-[2.5rem] text-text-secondary"
+
+                  placeholder="150,000"
+                  className="w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text focus:outline-none focus:ring focus:ring-b-border h-[2.5rem]"
                   required
                 />
-                <div className="absolute bottom-1 right-1 text-right text-[0.5rem] text-text-secondary">
-                  {formData.item_name.length} / 20
+                {errors.item_amount && <p className="text-red-500 text-xs mt-1">{errors.item_amount}</p>}
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm text-text-secondary">Why is this item special to you?</label>
+              <div className='relative'>
+                <textarea
+                  name="item_info"
+                  value={formData.item_info}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.length <= 125) {
+                      setFormData((prev) => ({ ...prev, item_info: value }));
+                    }
+                  }}
+                  placeholder="I want to get back in shape..."
+                  className="w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text text-text-secondary focus:outline-none focus:ring focus:ring-b-border resize-none"
+                  rows={4}
+                  required
+                />
+                <div className="absolute bottom-[10px] right-1 text-right text-[0.5rem] text-text-secondary">
+                  {formData.item_info.length} / 125
                 </div>
-                {errors.item_name && <p className="text-red-500 text-xs mt-1">{errors.item_name}</p>}
+                {errors.item_info && <p className="text-red-500 text-xs mt-1">{errors.item_info}</p>}
               </div>
             </div>
-          </div>
-          <div className="space-y-1">
-              <label className="text-sm text-text-secondary">Add a purchase link if any</label>
-              <input
-                type="url"
-                name="item_link"
-                value={formData.item_link}
-                onChange={handleChange}
-                placeholder="www.chiropractor.com/order"
-                className="w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text focus:outline-none focus:ring focus:ring-b-border h-[2.5rem]"
-              />
-            </div>
-          <div className="flex flex-row gap-4">
-            
-            <div className="space-y-1">
-              <label className="text-sm text-text-secondary">Contact</label>
-              <input
-                type="text"
-                name="item_contact"
-                value={formData.item_contact}
-                onChange={handleChange}
-                placeholder="0800 000 0000"
-                className="w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text focus:outline-none focus:ring focus:ring-b-border h-[2.5rem]"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm text-text-secondary">Amount (₦)</label>
-              <input
-                type="text"
-                name="item_amount"
-                value={formData.item_amount}
-                onChange={(e) => {
-                  const raw = e.target.value.replace(/[^0-9]/g, '');
-                  const limited = raw.slice(0, 10); // only allow 10 digits before decimal
-                  const formatted = Number(limited).toLocaleString();
-                  setFormData(prev => ({ ...prev, item_amount: formatted }));
-                }}
 
-                placeholder="150,000"
-                className="w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text focus:outline-none focus:ring focus:ring-b-border h-[2.5rem]"
-                required
-              />
-              {errors.item_amount && <p className="text-red-500 text-xs mt-1">{errors.item_amount}</p>}
-            </div>
+          <div className="flex gap-2">
+            <Button type="submit" variant="primary" className="w-full" disabled={submitting}>
+              {submitting ? 'Updating item...' : 'Update'}
+            </Button>
+            <Button type="button" variant="secondary" className="w-full" onClick={onCancel}>Cancel</Button>
           </div>
-
-          <div className="space-y-1">
-            <label className="text-sm text-text-secondary">Why is this item special to you?</label>
-            <div className='relative'>
-              <textarea
-                name="item_info"
-                value={formData.item_info}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value.length <= 125) {
-                    setFormData((prev) => ({ ...prev, item_info: value }));
-                  }
-                }}
-                placeholder="I want to get back in shape..."
-                className="w-full px-3 py-2 border border-b-border rounded-md text-sm bg-input-bg placeholder-placeholder-text text-text-secondary focus:outline-none focus:ring focus:ring-b-border resize-none"
-                rows={4}
-                required
-              />
-              <div className="absolute bottom-[10px] right-1 text-right text-[0.5rem] text-text-secondary">
-                {formData.item_info.length} / 125
-              </div>
-              {errors.item_info && <p className="text-red-500 text-xs mt-1">{errors.item_info}</p>}
-            </div>
-          </div>
-
-        <div className="flex gap-2">
-          <Button type="submit" variant="primary" className="w-full" disabled={submitting}>
-            {submitting ? 'Updating item...' : 'Update'}
-          </Button>
-          <Button type="button" variant="secondary" className="w-full" onClick={onCancel}>Cancel</Button>
-        </div>
-      </form>
+        </form>
     );
   }
 

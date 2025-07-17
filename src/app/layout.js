@@ -8,6 +8,7 @@ import Toggle from "@/components/common/Toggle";
 import { Geist } from "next/font/google";
 import { Playfair_Display } from "next/font/google";
 
+import { FilterProvider } from "@/context/useFilterBy";
 import { ItemViewProvider } from "@/context/useItemView";
 import { SelectedKinProvider } from "@/context/SelectedKinContext";
 
@@ -29,14 +30,16 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${geist.className} ${playfair.variable}`}>
         <ThemeProvider>
-          <SelectedKinProvider>
-            <ItemViewProvider>
-              <div className="fixed bottom-1 right-1 text-center p-4 bg-emerald-800 text-white py-2 w-40 h-auto rounded-xl text-xs z-[100]">
-                <Toggle />
-              </div>
-              <main>{children}</main>
-            </ItemViewProvider>
-          </SelectedKinProvider>
+           <FilterProvider>
+            <SelectedKinProvider>
+              <ItemViewProvider>
+                <div className="fixed bottom-1 right-1 text-center p-4 bg-emerald-800 text-white py-2 w-40 h-auto rounded-xl text-xs z-[100]">
+                  <Toggle />
+                </div>
+                <main>{children}</main>
+              </ItemViewProvider>
+            </SelectedKinProvider>
+          </FilterProvider>
         </ThemeProvider>
       </body>
     </html>

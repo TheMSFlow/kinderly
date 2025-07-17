@@ -1,7 +1,7 @@
 
 const ContentWrapMain = ({children}) => {
   return (
-    <div className='h-[100vh] w-full flex justify-center items-center overflow-hidden overflow-y-auto hide-scrollbar'>
+    <div className='h-[100vh] w-full flex justify-center items-center overflow-hidden'>
           {children}
     </div>
   )

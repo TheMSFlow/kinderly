@@ -11,7 +11,7 @@ const CreateNewItemSidebar = () => {
         <SubHeader 
         title={'New Item'}
         />
-        <div className='h-full w-full flex justify-center items-start overflow-hidden overflow-y-auto hide-scrollbar pt-12 lg:pt-[6rem] pb-[8rem] px-4'>
+        <div className='h-full w-full flex justify-center items-start overflow-hidden overflow-y-auto hide-scrollbar pt-10 lg:pt-[4rem] pb-[8rem] px-4'>
         <ItemForm />
         </div>
       </div>    

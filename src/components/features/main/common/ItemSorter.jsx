@@ -1,6 +1,8 @@
 'use client'
 import React, { useState } from 'react'
 import Selected from '@/components/icons/filter/Selected'
+import Up from '@/components/icons/filter/Up'
+import Down from '@/components/icons/filter/Down'
 import Date from '@/components/icons/filter/Date'
 import Amount from '@/components/icons/filter/Amount'
 import Visual from '@/components/icons/filter/Visual'
@@ -8,9 +10,10 @@ import Compact from '@/components/icons/filter/Compact'
 import Detailed from '@/components/icons/filter/Detailed'
 
 import { useItemView } from '@/context/useItemView'
+import { useFilterBy } from '@/context/useFilterBy'
 
 const ItemSorter = ({ onClose }) => {
-  const [selectedFilter, setSelectedFilter] = useState('date')
+  const { filterBy, filterOrder, toggleFilterBy } = useFilterBy()
   const { view: selectedView, setView: setSelectedView } = useItemView()
 
   return (
@@ -21,27 +24,27 @@ const ItemSorter = ({ onClose }) => {
 
       <button
         onClick={() => {
-          setSelectedFilter('date')
+          toggleFilterBy('date')
           onClose?.()
         }}
         className='flex h-10 pr-[0.625rem] justify-between items-center self-stretch border-b border-slate-800 text-slate-50'
       >
         <div className='flex flex-row gap-0 justify-center items-center'>
-          {selectedFilter === 'date' ? <Selected /> : <div className='h-6 w-6'></div>}
-          <p>Date Created</p>
+          {filterBy === 'date' ? (filterOrder === 'asc' ? <Up /> : <Down />) : <div className='h-6 w-6'></div>}
+          <p>Date</p>
         </div>
         <Date />
       </button>
 
       <button
         onClick={() => {
-          setSelectedFilter('amount')
+          toggleFilterBy('amount')
           onClose?.()
         }}
         className='flex h-10 pr-[0.625rem] justify-between items-center self-stretch border-b border-slate-800 text-slate-50'
       >
         <div className='flex flex-row gap-0 justify-center items-center'>
-          {selectedFilter === 'amount' ? <Selected /> : <div className='h-6 w-6'></div>}
+          {filterBy === 'amount' ? (filterOrder === 'asc' ? <Up /> : <Down />) : <div className='h-6 w-6'></div>}
           <p>Amount</p>
         </div>
         <Amount />
