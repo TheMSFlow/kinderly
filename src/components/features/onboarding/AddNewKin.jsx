@@ -40,7 +40,7 @@ const AddNewKin = ({profile, onClick}) => {
         onClick={onClick}
         className={`${baseStyles} ${className} `}
     >
-        {profile && <Image src={src} width={width} height={height} alt="" />}
+        {profile && <Image src={src} width={width} height={height} alt="" priority/>}
     </button>
   )
 }

@@ -41,17 +41,19 @@ const Nav = () => {
    
   if (pathname === '/profile') {
     return (
-      <button 
-      onClick={() => router.push('/profile/create')}
-      className='absolute bottom-4 w-60 h-20 flex gap-2 items-center justify-center bg-bg-nav backdrop-blur-[15px] text-sm px-8 py-4 rounded-full'>
-        <Add />
-        <p className='font-playfair text-lg'>Create item</p>
-      </button>
+      <div role="navigation" className="absolute bottom-4">
+        <button 
+        onClick={() => router.push('/profile/create')}
+        className='w-60 h-20 flex gap-2 items-center justify-center bg-bg-nav backdrop-blur-[15px] text-sm px-8 py-4 rounded-full'>
+          <Add />
+          <p className='font-playfair text-lg'>Create item</p>
+        </button>
+      </div>
     )
   }
 
   return (
-    <div className='absolute bottom-4 w-auto flex gap-4 items-center justify-between bg-bg-nav backdrop-blur-[15px] text-sm px-8 py-4 rounded-full'>
+    <nav className='absolute bottom-4 w-auto flex gap-4 items-center justify-between bg-bg-nav backdrop-blur-[15px] text-sm px-8 py-4 rounded-full'>
       {navItems.map(({ href, label, icon, activeIcon }) => {
         const isActive = pathname === href
         return (
@@ -59,21 +61,19 @@ const Nav = () => {
             aria-current={isActive ? 'page' : undefined}
             key={href}
             href={href}
+            title={label}
+            aria-label={label}
             className={`flex flex-col items-center justify-center w-12 h-12 text-xs rounded-lg  
                 ${isActive ? 'text-nav-active bg-nav-active-bg' : 'text-nav-default hover:bg-nav-hover active:text-nav-active'}`}
           >
             {isActive ? activeIcon : icon}
-            <p
-                className={`
-                ${label === 'Yaay!' && isActive ? 'text-text-primary' : ''}
-                `}
-            >
+            <p className={`${isActive && label === 'Yaay!' ? 'text-text-primary' : ''}`}>
                 {label}
             </p>
           </Link>
         )
       })}
-    </div>
+    </nav>
   )
 }
 

@@ -12,7 +12,7 @@ import Filter from '@/components/icons/header/Filter'
 import Logout from '@/components/icons/header/Logout'
 import Home from '@/components/icons/header/Home'
 import ContentWrapSidebar from '@/components/features/main/common/ContentWrapSidebar'
-import ItemCard from '@/components/features/main/profile/ItemCard'
+import ItemCard from '@/components/features/main/common/ItemCard'
 import Spacer from '@/components/common/Spacer'
 
 import ModalDecision from '@/components/common/ModalDecision'
@@ -130,25 +130,28 @@ const ProfileSidebar = () => {
       <div className='relative h-full w-full'>
         {!isReady && (
           <ContentWrapSidebar>
-            <div className="grid place-items-center w-full h-full text-center -mt-[2rem] text-text-secondary">Checking for items...</div>
+            <div className="grid place-items-center w-full h-full text-center -mt-[2rem] text-text-secondary lg:hidden">Checking for items...</div>
           </ContentWrapSidebar>
         )}
+
         <Header
         leftIcon={Home}
         rightIcon={Filter} 
         secondRightIcon={Logout}
-        title={'For You'}
+        title={`For ${selectedKin?.name || 'you'}`}
         onLeftClick={handleLeftIconClick}
         onRightClick={handleRightIconClick}
         onSecondRightClick={handleSecondRightIconClick}
         />
+
         {rightModal && (
           <div className='absolute z-10 top-20 right-4'> 
             <ItemSorter onClose={() => setRightModal(false)} /> 
           </div>
         )}
+
         <ContentWrapSidebar>
-          {items.length > 0 ? (
+          {sortedItems.length > 0 ? (
           <div className='lg:hidden flex flex-col justify-start items-center w-full gap-4 pt-4 px-4 h-full overflow-hidden overflow-y-auto hide-scrollbar'>
             {sortedItems.map((item) => (
               <ItemCard
@@ -170,10 +173,12 @@ const ProfileSidebar = () => {
           <ProfileEmptyState sidebar={true} />
         )}
         </ContentWrapSidebar>
+
         <div className='flex items-center justify-center w-full bg-transparent'>
           <Nav />
         </div>
       </div>
+      
       <ModalDecision 
         show={kinSwitchModal}
         action={'log out from your profile?'}

@@ -11,6 +11,7 @@ import { Playfair_Display } from "next/font/google";
 import { FilterProvider } from "@/context/useFilterBy";
 import { ItemViewProvider } from "@/context/useItemView";
 import { SelectedKinProvider } from "@/context/SelectedKinContext";
+import { ShowKinProvider } from "@/context/showKin";
 
 const geist = Geist({ subsets: ["latin"] });
 const playfair = Playfair_Display({
@@ -30,16 +31,18 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${geist.className} ${playfair.variable}`}>
         <ThemeProvider>
-           <FilterProvider>
-            <SelectedKinProvider>
-              <ItemViewProvider>
-                <div className="fixed bottom-1 right-1 text-center p-4 bg-emerald-800 text-white py-2 w-40 h-auto rounded-xl text-xs z-[100]">
-                  <Toggle />
-                </div>
-                <main>{children}</main>
-              </ItemViewProvider>
-            </SelectedKinProvider>
-          </FilterProvider>
+          <ShowKinProvider>
+            <FilterProvider>
+              <SelectedKinProvider>
+                <ItemViewProvider>
+                  <div className="fixed bottom-1 right-1 text-center p-4 bg-emerald-800 text-white py-2 w-40 h-auto rounded-xl text-xs z-[100]">
+                    <Toggle />
+                  </div>
+                  <main>{children}</main>
+                </ItemViewProvider>
+              </SelectedKinProvider>
+            </FilterProvider>
+          </ShowKinProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -7,7 +7,7 @@ const ProfileEmptyState = ({sidebar, main}) => {
   return (
     <div className='h-full '>
       {sidebar && 
-      <div className='flex flex-col justify-center items-center h-full'>
+      <div className='flex flex-col justify-center items-center h-full -mt-[2rem]'>
           <div className='grid place-items-center bg-slate-300 h-[4.5rem] w-[4.5rem] rounded-full'>
               <Gift />
           </div>

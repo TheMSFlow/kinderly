@@ -1,10 +1,13 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Button from '@/components/common/Button'
 import { hashPin } from '@/utils/pinUtils'
 import PinInput from '../auth/PinInput'
 import { supabase } from '@/supabaseClient'
+
+
 
 const roles = [ 'Father', 'Mother', 'Guardian', 'Child', 'Aunty', 'Uncle', 'Nephew', 'Niece', 'Cousin', 'Care giver', 'Family friend', 'Grandfather', 'Grandmother' ]
 
@@ -43,6 +46,9 @@ const genders = ['Male', 'Female']
 const ProfileModal = ({ data = {}, onClose, onComplete }) => {
   const modalRef = useRef(null)
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
 
   const [step, setStep] = useState(
     !data?.name || !data?.role ? 1 :
@@ -146,6 +152,15 @@ const ProfileModal = ({ data = {}, onClose, onComplete }) => {
       setLoading(false)
       onClose()
     }
+  }
+
+  const handleCancelOnboarding = () => {
+    onClose()
+
+    const current = new URLSearchParams(searchParams.toString())
+    current.delete('create')
+
+    router.replace(`/onboarding/profile?${current.toString()}`)
   }
 
   return (
@@ -290,10 +305,12 @@ const ProfileModal = ({ data = {}, onClose, onComplete }) => {
             />
           </div>
         )}
-
-        <Button variant="tertiary" onClick={handleNext} className="w-full border py-2 rounded-md text-sm">
-          {loading ? 'Processing...' : step === 3 ? 'Finish' : 'Continue'}
-        </Button>
+        <div className='flex flex-row w-full gap-2'>
+          {step === 1 && <Button variant='warning' className='w-full' onClick={handleCancelOnboarding}> Cancel </Button>}
+          <Button onClick={handleNext} className="w-full">
+            {loading ? 'Processing...' : step === 3 ? 'Finish' : 'Continue'}
+          </Button>
+        </div>
       </div>
     </div>
   )

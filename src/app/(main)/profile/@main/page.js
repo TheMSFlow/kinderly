@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import ContentWrapMain from '@/components/features/main/common/ContentWrapMain';
 import ProfileEmptyState from '@/components/features/main/profile/ProfileEmptyState';
-import ItemCard from '@/components/features/main/profile/ItemCard';
+import ItemCard from '@/components/features/main/common/ItemCard';
 import Spacer from '@/components/common/Spacer';
 import { useSelectedKin } from '@/context/SelectedKinContext';
 import { supabase } from '@/supabaseClient';
@@ -107,29 +107,31 @@ const ProfileMain = () => {
   }
 
   return (
-    <ContentWrapMain>
-      {items.length > 0 ? (
-        <div className="flex flex-col gap-4 items-center justify-start w-full pt-4 px-4 h-full overflow-y-auto hide-scrollbar">
-          {sortedItems.map((item) => (
-            <ItemCard
-              key={item.id}
-              id={item.id}
-              itemImage={item.item_image}
-              itemTitle={item.item_name}
-              itemAmount={item.item_amount}
-              itemReason={item.item_info}
-              itemLink={item.item_link}
-              itemContact={item.item_contact}
-              openItemId={openItemId}
-              setOpenItemId={setOpenItemId}
-            />
-          ))}
-          <Spacer height="2rem" />
-        </div>
-      ) : (
-        <ProfileEmptyState main={true} />
-      )}
-    </ContentWrapMain>
+     <>
+      <ContentWrapMain>
+        {sortedItems.length > 0 ? (
+          <div className="flex flex-col gap-4 items-center justify-start w-full pt-4 px-4 h-full overflow-y-auto hide-scrollbar">
+            {sortedItems.map((item) => (
+              <ItemCard
+                key={item.id}
+                id={item.id}
+                itemImage={item.item_image}
+                itemTitle={item.item_name}
+                itemAmount={item.item_amount}
+                itemReason={item.item_info}
+                itemLink={item.item_link}
+                itemContact={item.item_contact}
+                openItemId={openItemId}
+                setOpenItemId={setOpenItemId}
+              />
+            ))}
+            <Spacer height="2rem" />
+          </div>
+        ) : (
+          <ProfileEmptyState main={true} />
+        )}
+      </ContentWrapMain>
+    </>
   );
 };
 

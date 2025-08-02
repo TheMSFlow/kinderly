@@ -1,7 +1,8 @@
-"use client";
+'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const baseStyles =
   'flex flex-row py-2 px-4 justify-center items-center rounded-[6px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-b-border focus-visible:ring-offset-2 text-sm lg:text-base ';
@@ -19,7 +20,7 @@ const variants = {
 
 const Button = ({
   children,
-  className,
+  className = '',
   onClick,
   disabled = false,
   type = 'button',
@@ -30,19 +31,39 @@ const Button = ({
 }) => {
   const router = useRouter();
 
-  const handleClick = (e) => {
-    if (disabled) return;
-    if (onClick) onClick(e);
-    if (to) router.push(to);
-  };
+  useEffect(() => {
+    if (to) router.prefetch(to);
+  }, [to]);
+
+  const styles = `${baseStyles} ${variants[variant]} ${
+    disabled ? 'opacity-50 cursor-not-allowed' : ''
+  } ${className}`;
+
+  if (to && !disabled) {
+    return (
+      <Link
+        href={to}
+        className={styles}
+        onClick={(e) => {
+          if (disabled) {
+            e.preventDefault();
+            return;
+          }
+          if (onClick) onClick(e);
+        }}
+      >
+        {IconLeft && <IconLeft className="w-4 h-4 text-current" />}
+        {children}
+        {IconRight && <IconRight className="w-4 h-4 text-current" />}
+      </Link>
+    );
+  }
 
   return (
     <button
       type={type}
-      className={`${baseStyles} ${variants[variant]} ${
-        disabled ? 'opacity-50 cursor-not-allowed' : ''
-      } ${className}`}
-      onClick={handleClick}
+      className={styles}
+      onClick={onClick}
       disabled={disabled}
     >
       {IconLeft && <IconLeft className="w-4 h-4 text-current" />}

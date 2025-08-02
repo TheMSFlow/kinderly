@@ -1,8 +1,8 @@
 'use client'
 
-const Spacer = ({ height = '0.5rem' }) => {
+const Spacer = ({ height = '0.5rem', className }) => {
   return (
-    <div className="w-full block" style={{ minHeight: height }} />
+    <div className={`w-full block ${className || ''}`} style={{ minHeight: height }} />
   )
 }
 

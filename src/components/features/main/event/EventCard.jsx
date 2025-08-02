@@ -13,6 +13,7 @@ import ValentinesDay from '@/components/icons/events/ValentinesDay'
 import GrandFathersDay from '@/components/icons/events/GrandFathersDay'
 import GrandMothersDay from '@/components/icons/events/GrandMothersDay'
 import GrandAnniversary from '@/components/icons/events/GrandAnniversary'
+import Spacer from '@/components/common/Spacer'
 
 const EventCard = ({name, title, event = 'BirthDay', view = 'detailed', timeLeft, content}) => {
 
@@ -83,8 +84,8 @@ const EventCard = ({name, title, event = 'BirthDay', view = 'detailed', timeLeft
             <p className='font-medium text-3xl text-[#0F1D62] '>{name?.[0]?.toUpperCase()}</p>
             <div className='absolute -top-2'>{eventIcons[event] || <BirthDay />}</div> 
         </button>
-
     </div>
+    <Spacer height='10rem' />
     </>
   )
 }
